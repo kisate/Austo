@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 
 import sounddevice as sd
 
-sd.default.device = 7
 
 with open('train/data/config.json') as f:
     config = json.load(f)
@@ -30,16 +29,35 @@ while line != 'end':
 
     line = input()
 
-    duration = 20
+    duration = 10
     fs = 44100
 
     myrecording = sd.rec(int(duration * fs), samplerate=fs, channels=1)
     
     sd.wait()
 
+
     y = np.array([x[0] for x in myrecording])
+    print(y)
+
+
+    ind = 0
+    while (y[ind] < 0.1):
+        ind += 1
+    y = y[ind:]
+    ind = len(y)
+    while (y[ind - 1] < 0.1):
+        ind -= 1
+    y = y[:ind]
+
+    print(y)
 
     chroma_orig = librosa.feature.chroma_cqt(y=y, sr=fs)
+
+    onset_env = librosa.onset.onset_strength(y, sr=fs)
+    tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=fs)
+
+    print(tempo)
 
     l = len(chroma_orig[0])
 
@@ -55,11 +73,9 @@ while line != 'end':
     y_pred = bst.predict(dfeats)
     
     for x in y_pred:
-        if (names[x.argmax(axis=0)] > 0.7) : print("{} {}".format(max(x), names[x.argmax(axis=0)]))
+        if (max(x) > 0.7) : print("{} {}".format(max(x), names[x.argmax(axis=0)]))
         else : print("{} {}?".format(max(x), names[x.argmax(axis=0)]))
 
     line = input()
 
 
-
-sess.close()
