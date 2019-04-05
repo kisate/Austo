@@ -116,7 +116,7 @@ try:
             print('no input')
 
     with sd.InputStream(channels=1, callback=callback,
-                        blocksize=int(samplerate * 1),
+                        blocksize=int(samplerate * 0.05),
                         samplerate=samplerate):
         while waiting:
             pass
@@ -172,7 +172,7 @@ for x in y_pred:
         
     chord = x.argmax(axis=0)
         
-    if (max(x) > 0.7) : 
+    if (max(x) > 0.9) : 
         
         print("{} {}".format(max(x), names[chord]))
         chords_in_recording.append(chord)
@@ -182,14 +182,7 @@ for x in y_pred:
         print("{} {}?".format(max(x), names[chord]))
         chords_in_recording.append(-1)
 
-for i in range(len(chords_in_recording) - 4):
-    scores = {}
-    for chord in chords_in_recording[i:i+4]:
-        if (chord > -1):
-            if chord in scores.keys():
-                scores[chord] += 1
-            else:
-                scores[chord] = 1
+
     # for chord in scores.keys():
     #     if scores[chord] == 3:
     #         chords_in_recording[i] = chord
@@ -204,18 +197,40 @@ counts = {}
 print(chords_in_recording)
 
 for chord in chords_in_recording:
-    if chord in counts.keys():
-        counts[chord] += 1
-    else :
-        counts[chord] = 1
-        amount += 1
-   
+    if chord > - 1:
+        if chord in counts.keys():
+            counts[chord] += 1
+        else :
+            counts[chord] = 1
+    amount += 1
+print(counts)
 
 for x in scales.keys():
     score = 0
     for chord in counts.keys():
-        if counts[chord] > amount * 0.1:
+        if counts[chord] > amount * 0.05:
             score += scales[x][chord]
     if score > scale[1]:
-        scale = (x, amount)
+        scale = (x, score)
+s = ''
+for c in chords_in_recording:
+    if (c > -1) : s += names[c] + ' '
 
+print(scale)
+print(s)
+
+sequence = []
+scores = {}
+
+for chord in chords_in_recording:    
+    if chord > -1 :
+        if chord in scores.keys():
+            scores[chord] += 1
+        else :
+            scores[chord] = 1
+        if scores[chord] == 6:
+            for key in scores.keys():
+                if key != chord:
+                    scores[key] = 0
+            sequence.append(chord)
+print(sequence)
