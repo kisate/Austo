@@ -48,66 +48,62 @@ names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
 maj_pentatonic_scale = [0, 2, 4, 7, 9]
 min_pentatonic_scale = [0, 3, 5, 7, 10]
 
-chords = {}
+class MelodyGenerator():
+    
+    def init_chords(self, chords):
+        for i, name in enumerate(names):
 
-def init_chords():
-    for i, name in enumerate(names):
+            n = i // 2
 
-        n = i // 2
+            if (i % 2 == 0):
+                chords[name] = [n % 12, (n+4) % 12, (n+7) % 12]
+            else :
+                chords[name] = [n % 12, (n+3) % 12, (n+7) % 12]
+    
+    def __init__(self):
+        self.chords = {}
+        self.init_chords(self.chords)        
 
-        if (i % 2 == 0):
-            chords[name] = [n % 12, (n+4) % 12, (n+7) % 12]
-        else :
-            chords[name] = [n % 12, (n+3) % 12, (n+7) % 12]
 
-init_chords()
+    def generate(self, chord_seq, notes_per_tact=8):
 
-def generate(chord_seq):
+        seq_len = len(chord_seq)
 
-    seq_len = len(chord_seq)
+        matches = [list(set(self.chords[names[chord_seq[i]]]) & set(self.chords[names[chord_seq[(i+1) % seq_len]]])) for i in range(seq_len)]
+    
+        melody = []
 
-    matches = [list(set(chords[names[chord_seq[i]]]) & set(chords[names[chord_seq[(i+1) % seq_len]]])) for i in range(seq_len)]
- 
-    melody = []
+        for i, chord in enumerate(chord_seq):
+            time = [chord // 2] * notes_per_tact
+            if len(matches[i]) > 0:
+                time[notes_per_tact-1] = matches[i][random.randint(0, len(matches[i]) - 1)]
+            if chord % 2 == 0:
+                for j in range(notes_per_tact):
+                    time[j] = (time[j] + maj_pentatonic_scale[random.randint(0, 4)]) % 12
+            else :
+                for j in range(notes_per_tact):
+                    time[j] = (time[j] + min_pentatonic_scale[random.randint(0, 4)]) % 12
+            melody.extend(time)
+                
+    
+        return melody
 
-    for i, chord in enumerate(chord_seq):
-        time = [chord // 2, chord // 2, chord // 2, chord // 2]
-        if len(matches[i]) > 0:
-            time[3] = matches[i][random.randint(0, len(matches[i]) - 1)]
-        if chord % 2 == 0:
-            time[0] = (time[0] + maj_pentatonic_scale[random.randint(0, 4)]) % 12
-            time[1] = (time[1] + maj_pentatonic_scale[random.randint(0, 4)]) % 12
-            time[2] = (time[2] + maj_pentatonic_scale[random.randint(0, 4)]) % 12
-        else :
-            time[0] = (time[0] + min_pentatonic_scale[random.randint(0, 4)]) % 12
-            time[1] = (time[1] + min_pentatonic_scale[random.randint(0, 4)]) % 12
-            time[2] = (time[2] + min_pentatonic_scale[random.randint(0, 4)]) % 12
-        melody.extend(time)
-             
+    def write_midi(self, melody, name = 'melody.mid', notes_per_tact=8):
+        from midiutil import MIDIFile
 
-    return melody
+        track    = 0
+        channel  = 0
+        time     = 0    # In beats
+        duration = 1/notes_per_tact    # In beats
+        tempo    = 50   # In BPM
+        volume   = 100  # 0-127, as per the MIDI standard
 
-m = generate([6, 1, 16, 20])
-s = ''
-for x in m:
-    s += note_names[x] + ' '
-print(s)
+        MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
+                            # automatically)
+        MyMIDI.addTempo(track, time, tempo)
 
-from midiutil import MIDIFile
+        for i, pitch in enumerate(melody):
+            MyMIDI.addNote(track, channel, pitch + 57, time + i*duration, duration, volume)
 
-track    = 0
-channel  = 0
-time     = 0    # In beats
-duration = 0.25    # In beats
-tempo    = 50   # In BPM
-volume   = 100  # 0-127, as per the MIDI standard
-
-MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
-                      # automatically)
-MyMIDI.addTempo(track, time, tempo)
-
-for i, pitch in enumerate(m):
-    MyMIDI.addNote(track, channel, pitch + 57, time + i*duration, duration, volume)
-
-with open("melody.mid", "wb") as output_file:
-    MyMIDI.writeFile(output_file)
+        with open(name, "wb") as output_file:
+            MyMIDI.writeFile(output_file)

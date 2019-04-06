@@ -12,42 +12,46 @@ with open('train/data/config.json') as f:
 
 train_dir = config['train_dir']
 
-names = ['A', 'Am', 'B', 'Bm', 'C', 'Cm', 'D', 'Dm', 'E', 'Em', 'F', 'Fm', 'G', 'Gm']
-
 classes = {
-    'A' : 0, 
-    'Am': 1,
-    'B' : 2,
-    'Bm': 3, 
-    'C' : 4, 
-    'Cm': 5, 
-    'D' : 6, 
-    'Dm': 7, 
-    'E' : 8, 
-    'Em': 9, 
-    'F' : 10,
-    'Fm': 11, 
-    'G' : 12, 
-    'Gm': 13
-}
+    'A'  : 0,
+    'Am' : 1,
+    'A#' : 2,
+    'Am#': 3,
+    'B'  : 4,
+    'Bm' : 5,
+    'C'  : 6,
+    'Cm' : 7,
+    'C#' : 8,
+    'Cm#': 9,
+    'D'  : 10,
+    'Dm' : 11,
+    'D#' : 12,
+    'Dm#': 13,
+    'E'  : 14,
+    'Em' : 15,
+    'F'  : 16,
+    'Fm' : 17,
+    'F#' : 18,
+    'Fm#': 19,
+    'G'  : 20,
+    'Gm' : 21,
+    'G#' : 22,
+    'Gm#': 23
+    }
 
-scales = {
-    'A' : [10, 0, 0, 0, 0, 0, 4, 0, 5, 0, 0, 0, 0, 0],
-    'Am': [0, 10, 0, 0, 0, 0, 0, 4, 0, 5, 0, 0, 0, 0],
-    'B' : [0, 0, 10, 0, 0, 0, 0, 0, 4, 0, 5, 0, 0, 0],
-    'Bm': [0, 0, 0, 10, 0, 0, 0, 0, 0, 4, 0, 5, 0, 0],
-    'C' : [0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 4, 0, 5, 0],
-    'Cm': [0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 4, 0, 5],
-    'D' : [5, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 4, 0],
-    'Dm': [0, 5, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 4],
-    'E' : [4, 0, 5, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0],
-    'Em': [0, 4, 0, 5, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0],
-    # 'F' : [0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0],
-    # 'Fm': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0], 
-    'G' : [0, 0, 0, 0, 4, 0, 5, 0, 0, 0, 0, 0, 10, 0],
-    'Gm': [0, 0, 0, 0, 0, 4, 0, 5, 0, 0, 0, 0, 0, 10]
-}
- 
+names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
+ 'D#', 'Dm#', 'E', 'Em', 'F', 'Fm', 'F#', 'Fm#', 'G', 'Gm', 'G#', 'Gm#']
+
+
+scales = {}
+
+def init_scales():
+    for i, name in enumerate(names):
+        scale = [0]*24
+        scale[i] = 10
+        scale[(i+10) % 24] = 4
+        scale[(i+14) % 24] = 5
+        scales[name] = scale 
 
 
 
@@ -131,6 +135,8 @@ print('recording {} seconds'.format(duration))
 myrecording = sd.rec(int(duration * samplerate), samplerate=samplerate, channels=1)
 
 sd.wait()
+
+print('done')
 
 y = np.array([x[0] for x in myrecording])
 print(y)
@@ -234,3 +240,10 @@ for chord in chords_in_recording:
                     scores[key] = 0
             sequence.append(chord)
 print(sequence)
+
+from melody_generator import MelodyGenerator
+
+gen = MelodyGenerator()
+
+melody = gen.generate(sequence[:4])
+gen.write_midi(melody)

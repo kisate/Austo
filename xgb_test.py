@@ -51,19 +51,19 @@ param = {}
 # use softmax multi-class classification
 param['objective'] = 'multi:softprob'
 # scale weight of positive examples
-param['eta'] = 0.5
-param['max_depth'] = 10
+param['eta'] = 0.1
+param['max_depth'] = 30
 param['silent'] = 1
 param['nthread'] = 4
 param['subsample'] = 0.5
 param['predictor'] = 'gpu_predictor'
 
-param['num_class'] = 14
+param['num_class'] = 24
 
 evallist = [(dtest, 'eval'), (dtrain, 'train')]
 
 num_round = 1000
-bst = xgb.train(param, dtrain, num_round, evallist, early_stopping_rounds=500)
+bst = xgb.train(param, dtrain, num_round, evallist, early_stopping_rounds=100)
 
 pred = bst.predict(dtest)
 

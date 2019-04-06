@@ -7,6 +7,6 @@
     "train_dir" : "/home/dumtrii/Documents/Austro/train/model/",
     "path_to_events" : "/home/dumtrii/Documents/Austro/train/events",
     "n_features" : 12,
-    "n_classes" : 14,
+    "n_classes" : 28,
     "learning_rate" : 0.001
 }
