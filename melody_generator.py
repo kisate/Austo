@@ -47,6 +47,7 @@ names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
 
 maj_pentatonic_scale = [0, 2, 4, 7, 9]
 min_pentatonic_scale = [0, 3, 5, 7, 10]
+probs = [2, 3, 1, 3, 2]
 
 class MelodyGenerator():
     
@@ -62,10 +63,21 @@ class MelodyGenerator():
     
     def __init__(self):
         self.chords = {}
-        self.init_chords(self.chords)        
+        self.init_chords(self.chords)      
+
+    def get_next(self, current) : 
+        total = sum(probs)
+        chosen = random.uniform(0, total)
+        cumulative = 0
+
+        for i, x in enumerate(probs):
+            cumulative += x
+            if cumulative > chosen:
+                return (i + current - 2) % 5
 
 
-    def generate(self, chord_seq, notes_per_tact=8):
+
+    def generate(self, chord_seq, beats_per_chord=8):
 
         seq_len = len(chord_seq)
 
@@ -74,27 +86,33 @@ class MelodyGenerator():
         melody = []
 
         for i, chord in enumerate(chord_seq):
-            time = [chord // 2] * notes_per_tact
+            time = [chord // 2] * beats_per_chord
             if len(matches[i]) > 0:
-                time[notes_per_tact-1] = matches[i][random.randint(0, len(matches[i]) - 1)]
+                time[beats_per_chord-1] = matches[i][random.randint(0, len(matches[i]) - 1)]
             if chord % 2 == 0:
-                for j in range(notes_per_tact):
-                    time[j] = (time[j] + maj_pentatonic_scale[random.randint(0, 4)]) % 12
+                prev_step = random.randint(0, 4)
+                time[0] = (time[0] + maj_pentatonic_scale[prev_step]) % 12
+                for j in range(1, beats_per_chord):
+                    prev_step = self.get_next(prev_step)
+                    time[j] = (time[j] + maj_pentatonic_scale[prev_step]) % 12
             else :
-                for j in range(notes_per_tact):
-                    time[j] = (time[j] + min_pentatonic_scale[random.randint(0, 4)]) % 12
+                prev_step = random.randint(0, 4)
+                time[0] = (time[0] + min_pentatonic_scale[prev_step]) % 12
+                for j in range(1, beats_per_chord):
+                    prev_step = self.get_next(prev_step)
+                    time[j] = (time[j] + min_pentatonic_scale[prev_step]) % 12
             melody.extend(time)
                 
     
         return melody
 
-    def write_midi(self, melody, name = 'melody.mid', notes_per_tact=8):
+    def write_midi(self, melody, name = 'melody.mid'):
         from midiutil import MIDIFile
 
         track    = 0
         channel  = 0
-        time     = 0    # In beats
-        duration = 1/notes_per_tact    # In beats
+        time     = 4    # In beats
+        duration = 0.25    # In beats
         tempo    = 50   # In BPM
         volume   = 100  # 0-127, as per the MIDI standard
 

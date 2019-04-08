@@ -1,19 +1,22 @@
+from melody_generator import MelodyGenerator
 
+gen = MelodyGenerator()
 
-names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
- 'D#', 'Dm#', 'E', 'Em', 'F', 'Fm', 'F#', 'Fm#', 'G', 'Gm', 'G#', 'Gm#']
+melody = gen.generate([14, 4, 20, 0 ])
+gen.write_midi(melody)
 
+print('playing')
 
-scales = {}
+from midi2audio import FluidSynth
+FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('melody.mid', 'melody.wav')
 
-def init_scales():
-    for i, name in enumerate(names):
-        scale = [0]*24
-        scale[i] = 10
-        scale[(i+10) % 24] = 4
-        scale[(i+14) % 24] = 5
-        scales[name] = scale
-
-init_scales()
-
-
+try:
+    import sounddevice as sd
+    import soundfile as sf
+    data, fs = sf.read('melody.wav', dtype='float32')
+    sd.play(data, fs)
+    status = sd.wait()
+except KeyboardInterrupt:
+    print('\nInterrupted by user')
+except Exception as e:
+    print(type(e).__name__ + ': ' + str(e))
