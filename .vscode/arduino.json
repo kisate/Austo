@@ -1,5 +1,5 @@
 {
-    "port": "/dev/ttyUSB1",
+    "port": "/dev/ttyUSB0",
     "board": "arduino:avr:unowifi",
-    "sketch": "arduino/main/main.ino"
+    "sketch": "arduino/servo_test/servo2_test.ino"
 }

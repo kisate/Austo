@@ -59,12 +59,12 @@ void loop() {
                 str[1] = '\0';
                 Serial.print(str);
             }
-            // Serial.print("A");
+            Serial.print("A");
             break;
         default :
             break;
     }
 
-    // Serial.println("B");
+    Serial.println("B");
     delay(1000);
 }
