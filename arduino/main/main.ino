@@ -68,7 +68,6 @@ int get_pulse(int angle)
 {
     return angle * 7 / 3 + SERVOMIN;
 }
-
 void loop()
 {
     // Drive each servo one at a time
@@ -131,4 +130,5 @@ void loop()
     // delay(100);
     // servonum ++;
     // if (servonum > 5) servonum = 4;
+
 }

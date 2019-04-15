@@ -3,11 +3,13 @@
         {
             "name": "Linux",
             "includePath": [
+                "/home/forester/software/arduino-1.8.8/tools/**",
+                "/home/forester/software/arduino-1.8.8/hardware/arduino/avr/**",
                 "/home/tlab/Downloads/arduino-1.8.8/tools/**",
                 "/home/tlab/Downloads/arduino-1.8.8/hardware/arduino/avr/**"
             ],
             "forcedInclude": [
-                "/home/tlab/Downloads/arduino-1.8.8/hardware/arduino/avr/cores/arduino/Arduino.h"
+                "/home/forester/software/arduino-1.8.8/hardware/arduino/avr/cores/arduino/Arduino.h"
             ],
             "intelliSenseMode": "gcc-x64",
             "compilerPath": "/usr/bin/gcc",
