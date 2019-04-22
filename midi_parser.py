@@ -29,8 +29,7 @@ for msg in mid:
 
                 for i, x in enumerate(times):
                     if abs(x-note_time)/note_time < 0.000001:
-                        melody.append((last_note - 57) % 12)
-                        melody.append(i)
+                        melody.append([(last_note - 57) % 12, i])
                         print (abs(x-note_time)/note_time)
                         break        
 
@@ -53,8 +52,7 @@ for msg in mid:
 
 print(melody)
 
-melody.append(12)
-melody.append(0)
+melody.append([12, 0])
 
 import serial, time
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
@@ -62,6 +60,6 @@ time.sleep(1) #give the connection a second to settle
 # arduino.write(b"Hello from Python!")
 
 for x in melody:
-    arduino.write([x])
+    arduino.write(x)
     print(arduino.read())
 
