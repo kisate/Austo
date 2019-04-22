@@ -4,6 +4,12 @@
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN 80
 #define SERVOMAX 600
+#define UPBORDER 9
+#define DOWNBORDER 7 
+#define ARMSMOTORUP 50
+#define ARMSMOTORDOWN 48
+#define PUMP 15 //HIGH -- off, LOW -- on
+#define VALVE 13 //HIGH -- off, LOW -- on
 
 
 short fingerings[12][8] = {
@@ -51,11 +57,20 @@ void setup()
     pwm.setPWMFreq(60); // Analog servos run at ~60 Hz updates
     
     
-    pinMode(15, OUTPUT); //Pump HIGH -- off, LOW -- on
-    pinMode(13, OUTPUT);  //Valve HIGH -- off, LOW -- on
+    pinMode(PUMP, OUTPUT); 
+    pinMode(VALVE, OUTPUT);  
+    pinMode(DOWNBORDER, INPUT_PULLUP);
+    pinMode(UPBORDER, INPUT_PULLUP);
+    pinMode(ARMSMOTORDOWN, OUTPUT);
+    pinMode(ARMSMOTORUP, OUTPUT);
+
     delay(100);
-    digitalWrite(15, LOW);
-    digitalWrite(13, LOW);
+    
+    digitalWrite(PUMP, HIGH);
+    digitalWrite(VALVE, HIGH);
+    digitalWrite(ARMSMOTORUP, LOW);
+    digitalWrite(ARMSMOTORDOWN, LOW);
+
     delay(100);
     pick_note(3);
     delay(100);
