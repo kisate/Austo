@@ -1,8 +1,22 @@
 import serial, time
-arduino = serial.Serial('/dev/ttyUSB0', 9600, timeout=.1)
-time.sleep(2)
-arduino.write(b"Such a wonderful world")
+arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
+time.sleep(1) #give the connection a second to settle
+# arduino.write(b"Hello from Python!")
+
+sequence = []
+
 while True:
-	data = arduino.readline()[:-2] #the last bit gets rid of the new-line chars
-	if data:
-		print (data)
+	a = input()
+	seq = [int(x) for x in a.split()]
+	arduino.write(seq)
+
+
+# while True:
+# 	a = input()
+# 	if a == 'q':
+# 		break
+# 	b = bytes([int(x) for x in a.split()])
+# 	print(b)
+# 	arduino.write(b)
+# 	time.sleep(0.1)
+# 	print(arduino.readlines())

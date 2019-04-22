@@ -77,7 +77,7 @@ class MelodyGenerator():
 
 
 
-    def generate(self, chord_seq, beats_per_chord=8):
+    def generate(self, chord_seq, beats_per_chord=16):
 
         seq_len = len(chord_seq)
 
@@ -93,15 +93,24 @@ class MelodyGenerator():
                 prev_step = random.randint(0, 4)
                 time[0] = (time[0] + maj_pentatonic_scale[prev_step]) % 12
                 for j in range(1, beats_per_chord):
-                    prev_step = self.get_next(prev_step)
+                    next_step = self.get_next(prev_step)
+                    
+                    while ((time[j] + maj_pentatonic_scale[prev_step]) % 12 in [4, 6]) :
+                        next_step = self.get_next(prev_step)
+
                     time[j] = (time[j] + maj_pentatonic_scale[prev_step]) % 12
+                    prev_step = next_step
             else :
                 prev_step = random.randint(0, 4)
                 time[0] = (time[0] + min_pentatonic_scale[prev_step]) % 12
                 for j in range(1, beats_per_chord):
                     prev_step = self.get_next(prev_step)
                     time[j] = (time[j] + min_pentatonic_scale[prev_step]) % 12
-            melody.extend(time)
+            
+            for x in time:
+                melody.append(x)
+                melody.append(5)
+            
                 
     
         return melody
@@ -111,17 +120,22 @@ class MelodyGenerator():
 
         track    = 0
         channel  = 0
-        time     = 4    # In beats
-        duration = 0.25    # In beats
-        tempo    = 50   # In BPM
+        time     = 0  
+        last     = time  # In beats
+        tempo    = 120   # In BPM
         volume   = 100  # 0-127, as per the MIDI standard
+
+        beat = 60/tempo
+        times = [4*beat, 3*beat, 2*beat, 3*beat/2, beat, beat/2, 3*beat/4, beat/4]
 
         MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
                             # automatically)
         MyMIDI.addTempo(track, time, tempo)
 
-        for i, pitch in enumerate(melody):
-            MyMIDI.addNote(track, channel, pitch + 57, time + i*duration, duration, volume)
+        for note in melody:
+            pitch, duration = note
+            MyMIDI.addNote(track, channel, pitch + 57, last + times[duration], times[duration], volume)
+            last += times[duration]
 
         with open(name, "wb") as output_file:
             MyMIDI.writeFile(output_file)

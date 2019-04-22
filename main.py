@@ -246,23 +246,55 @@ from melody_generator import MelodyGenerator
 gen = MelodyGenerator()
 
 melody = gen.generate(sequence[:4])
-gen.write_midi(melody)
+# melody.append(12)
+
+# import serial, time
+# arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
+# time.sleep(1) #give the connection a second to settle
+# arduino.write(b"Hello from Python!")
+
+# arduino.write(melody)
+
+
+# gen.write_midi(melody)
 
 
 print('playing')
 
-from midi2audio import FluidSynth
-FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('melody.mid', 'melody.wav')
+# from midi2audio import FluidSynth
+# FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('melody.mid', 'melody.wav')
 
-try:
-    import sounddevice as sd
-    import soundfile as sf
-    data, fs = sf.read('melody.wav', dtype='float32')
-    data = data
-    while True:
-        sd.play(data, fs)
-        status = sd.wait()
-except KeyboardInterrupt:
-    print('\nInterrupted by user')
-except Exception as e:
-    print(type(e).__name__ + ': ' + str(e))
+# try:
+#     import sounddevice as sd
+#     import soundfile as sf
+#     print('wav')
+#     data, fs = sf.read('melody.wav', dtype='float32')
+#     data = data
+#     seq = []
+#     seq.extend(data)
+#     seq.extend(data)
+#     seq.extend(data)
+#     seq.extend(data)
+#     print(len(data))
+#     print(len(seq))
+#     while True:
+#         sd.play(np.array(seq), fs)
+#         status = sd.wait()
+# except KeyboardInterrupt:
+#     print('\nInterrupted by user')
+# except Exception as e:
+#     print(type(e).__name__ + ': ' + str(e))
+
+
+melody.append(12)
+melody.append(0)
+
+import serial, time
+arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
+time.sleep(1) #give the connection a second to settle
+# arduino.write(b"Hello from Python!")
+
+for x in melody:
+    arduino.write([x])
+    print(arduino.read())
+
