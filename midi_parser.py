@@ -1,6 +1,6 @@
 import mido
 
-mid = mido.MidiFile('midi/shepherd.mid')
+mid = mido.MidiFile('midi/ode.mid')
 melody = []
 tempo = 0
 for msg in mid:

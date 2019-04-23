@@ -2,5 +2,4 @@
     "port": "/dev/ttyUSB0",
     "board": "arduino:avr:megaADK",
     "sketch": "arduino/main/main.ino"
-
 }

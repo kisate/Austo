@@ -8,8 +8,10 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define DOWNBORDER 7 
 #define ARMSMOTORUP 50
 #define ARMSMOTORDOWN 48
+#define HEADSERVO 8
 #define PUMP 15 //HIGH -- off, LOW -- on
 #define VALVE 13 //HIGH -- off, LOW -- on
+#define LCD 3
 
 
 short fingerings[12][8] = {
@@ -63,6 +65,7 @@ void setup()
     pinMode(UPBORDER, INPUT_PULLUP);
     pinMode(ARMSMOTORDOWN, OUTPUT);
     pinMode(ARMSMOTORUP, OUTPUT);
+    pinMode(LCD, OUTPUT);
 
     delay(100);
     
@@ -72,6 +75,7 @@ void setup()
     digitalWrite(ARMSMOTORDOWN, LOW);
 
     delay(100);
+    pwm.setPWM(8, 0, get_pulse(45));
     pick_note(3);
     delay(100);
 }
@@ -109,99 +113,117 @@ int get_pulse(int angle)
 {
     return map(angle, 0, 100, SERVOMIN, SERVOMAX);
 }
-// void loop()
-// {
-//     // if 
 
+void lower_arms()
+{
+    while (digitalRead(DOWNBORDER) == 0)
+    {
+        digitalWrite(ARMSMOTORDOWN, HIGH);
+        digitalWrite(ARMSMOTORUP, LOW);
+    }
 
-//     // Drive each servo one at a time
+    digitalWrite(ARMSMOTORDOWN, LOW);
+    digitalWrite(ARMSMOTORUP, LOW);
+}
 
-//     // switch(state)
-//     // {
-//     //     case 0 :
-//     //         if(Serial.available() > 0) {
-//     //             char data = Serial.read();
-//     //             char str[2];
-//     //             str[0] = data;
-//     //             str[1] = '\0';
-//     //             Serial.print(str);
-//     //         }
-//     //         // Serial.print("A");
-//     //         break;
-//     //     default :
-//     //         break;
-//     // }
+void raise_arms()
+{
+    while (digitalRead(UPBORDER) == 0)
+    {
+        digitalWrite(ARMSMOTORDOWN, LOW);
+        digitalWrite(ARMSMOTORUP, HIGH);
+    }
 
-//     // // Serial.println("B");
-//     // delay(1000);
+    digitalWrite(ARMSMOTORDOWN, LOW);
+    digitalWrite(ARMSMOTORUP, LOW);
+}
 
-
-//     // rotate_from_to(int(positions[servonum-4][0]*7/3) + SERVOMIN, int(positions[servonum-4][1]*7/3) + SERVOMIN, servonum);
-//     // rotate_from_to(int(positions[servonum-4][1]*7/3) + SERVOMIN, int(positions[servonum-4][0]*7/3) + SERVOMIN, servonum);
-
-
-    
-
-//     // pwm.setPWM(servos[servonum], 0, p2);
-    
-
-//     // int p1 = get_pulse(positions[4][0]);
-//     // int p2 = get_pulse(positions[4][1]);
-//     // int p3 = get_pulse(positions[5][0]);
-//     // int p4 = get_pulse(positions[5][1]);
-//     // int p5 = get_pulse(positions[6][0]);
-//     // int p6 = get_pulse(positions[7][0]);
-
-//     // digitalWrite(9, HIGH);
-//     // pwm.setPWM(servos[4], 0, p2);
-//     // pwm.setPWM(servos[6], 0, p5);
-//     // pwm.setPWM(servos[7], 0, p6);
-//     // delay(400);
-//     // pwm.setPWM(servos[5], 0, p4);
-//     // delay(400);
-
-//     // digitalWrite(9, LOW);
-//     // pwm.setPWM(servos[5], 0, p3);
-//     // delay(400);
-//     // pwm.setPWM(servos[4], 0, p1);
-//     // delay(400);
-    
-    
-//     // int note = scale[step];
-//     // step++;
-//     // if (step > 6) step = 0;
-
-//     // pick_note(note);
-//     // delay(1000);
-
-//     if(Serial.available() > 0) {
-// 		char data = Serial.read();
-// 		char str[2];
-// 		str[0] = data;
-// 		str[1] = '\0';
-// 		Serial.print(str);
-//         pick_note(int(data));
-//         delay(1000);
-// 	}
-
-
-//     // int p1 = get_pulse(positions[servonum][1]);
-//     // int p2 = get_pulse(positions[servonum][0]);
-
-//     // rotate_from_to(p1, p2, servos[servonum]);
-//     // delay(100);
-//     // rotate_from_to(p2, p1, servos[servonum]);
-//     // delay(100);
-//     // servonum ++;
-//     // if (servonum > 7) servonum = 1;
-
-// }
-
-// void setup() {
-// 	Serial.begin(115200);
-// }
 void loop() {
-	if(state == 0 && Serial.available() > 1) {
+
+    if (state == 0 && Serial.available() > 0)
+    {
+        Serial.read();
+
+        for (int i = 45; i > 20; --i)
+        {
+            pwm.setPWM(8, 0, get_pulse(i));
+            delay(60);
+        }
+        
+        delay(1000);
+
+        for (int i = 20; i <= 45; ++i)
+        {
+            pwm.setPWM(8, 0, get_pulse(i));
+            delay(60);
+        }
+
+        state = 1;
+    }
+
+    else if (state == 1 && Serial.available() > 0)
+    {
+        Serial.read();
+
+        for (int i = 45; i > 20; --i)
+        {
+            pwm.setPWM(8, 0, get_pulse(i));
+            delay(60);
+        }
+        
+        delay(1000);
+
+        for (int i = 20; i <= 45; ++i)
+        {
+            pwm.setPWM(8, 0, get_pulse(i));
+            delay(60);
+        }
+
+        raise_arms();
+
+        digitalWrite(PUMP, LOW);    
+        digitalWrite(VALVE, HIGH);
+
+        delay(1000);
+
+        pick_note(3);
+        digitalWrite(VALVE, LOW);
+        delay(500);
+        
+        pick_note(7);
+        delay(500);
+
+        pick_note(10);
+        delay(500);
+
+        digitalWrite(VALVE, HIGH);
+
+        delay(3000);
+
+        pick_note(10);
+        digitalWrite(VALVE, LOW);
+        delay(500);
+        
+        pick_note(2);
+        delay(500);
+
+        pick_note(5);
+        delay(500);
+
+        state = 2;
+        digitalWrite(PUMP, LOW);
+        digitalWrite(VALVE, HIGH);
+    }
+
+    else if(state == 2 && Serial.available() > 0)
+    {
+        Serial.read();
+        digitalWrite(LCD, HIGH);
+        state = 3;
+    }
+
+	else if(state == 3 && Serial.available() > 1) {
+        digitalWrite(LCD, LOW);
 		unsigned note = Serial.read();
         Serial.write(note);
         unsigned dur = Serial.read();
@@ -209,11 +231,12 @@ void loop() {
 		
         if (note > 11) 
         {
+            
             digitalWrite(PUMP, LOW);
             digitalWrite(VALVE, HIGH);
             delay(1000);
                
-            state = 1;
+            state = 3;
         }
 
         else 
@@ -225,7 +248,7 @@ void loop() {
         }
 	}
 
-    else if (state == 1)
+    else if (state == 3)
     {
 
         short passed = 0;
@@ -235,8 +258,13 @@ void loop() {
             pick_note(sequence[i][0]);
             digitalWrite(PUMP, LOW);
             digitalWrite(VALVE, LOW);
-            delay(uint16_t(sequence[i][1]*semiq*1));
+            delay(uint16_t(sequence[i][1]*semiq*0.95));
+            // digitalWrite(PUMP, HIGH);
+            digitalWrite(VALVE, HIGH);
+            delay(uint16_t(sequence[i][1]*semiq*0.05));
+            
             passed += sequence[i][1];
+            
             if (passed >= 32) 
             {
                 digitalWrite(VALVE, HIGH);

@@ -1,49 +1,5 @@
 import random
-
-note_codes = {
-    'A' : 0,
-    'A#': 1,
-    'B' : 2,
-    'C' : 3,
-    'C#': 4,
-    'D' : 5,
-    'D#': 6,
-    'E' : 7,
-    'F' : 8,
-    'F#': 9,
-    'G' : 10,
-    'G#': 11
-    } 
-note_names = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
-classes = {
-    'A'  : 0,
-    'Am' : 1,
-    'A#' : 2,
-    'Am#': 3,
-    'B'  : 4,
-    'Bm' : 5,
-    'C'  : 6,
-    'Cm' : 7,
-    'C#' : 8,
-    'Cm#': 9,
-    'D'  : 10,
-    'Dm' : 11,
-    'D#' : 12,
-    'Dm#': 13,
-    'E'  : 14,
-    'Em' : 15,
-    'F'  : 16,
-    'Fm' : 17,
-    'F#' : 18,
-    'Fm#': 19,
-    'G'  : 20,
-    'Gm' : 21,
-    'G#' : 22,
-    'Gm#': 23
-    }
-
-names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
- 'D#', 'Dm#', 'E', 'Em', 'F', 'Fm', 'F#', 'Fm#', 'G', 'Gm', 'G#', 'Gm#']
+from stuff import *
 
 maj_pentatonic_scale = [0, 2, 4, 7, 9]
 min_pentatonic_scale = [0, 3, 5, 7, 10]
@@ -56,7 +12,7 @@ scales = [
 
 probs = [3, 6, 5, 0.1, 5, 6, 2]
 
-tension_border = 12
+
 tensions = [
     [0, 2, 3, 2, 1, 2, 6],
     [-10, 2, 1, -5, -5, 4, 5],
@@ -66,6 +22,8 @@ tensions = [
     [-4, 3, 2, -2, -4, 2, 3],
     [-6, 2, 3, -2, -3, 2, 4],
 ]
+
+tension_border = 12
 
 class MelodyGenerator():
     
@@ -114,7 +72,7 @@ class MelodyGenerator():
 
     def process_chord(self, chord, beats_per_chord=16):
 
-        melody = [chord // 4, 4]
+        melody = [chord // 2, 4]
         tension = 0
         semiqs_left = (beats_per_chord - 2)*4
         prev_step = 0
@@ -133,13 +91,15 @@ class MelodyGenerator():
             
             length = random.randint(2, min(4, max(2, tension_border - tension)))
             length = min(length, semiqs_left)
+            if (semiqs_left % 16 > 0):
+                length = min(length, semiqs_left % 16)
             semiqs_left -= length
-            melody.append((chord // 4 + scales[chord % 2][next_step]) % 12)
+            melody.append((chord // 2 + scales[chord % 2][next_step]) % 12)
             melody.append(length)
         
             prev_step = next_step
 
-        melody.append(chord // 4)
+        melody.append(chord // 2)
         melody.append(4)
 
         return melody
@@ -174,9 +134,9 @@ class MelodyGenerator():
         for i in range(len(melody)//2):
             pitch, duration = melody[2*i], melody[1+2*i]
 
-            track.append(Message('note_on', note=pitch + 57, velocity=80, time=0))
+            track.append(Message('note_on', note=pitch + 54, velocity=80, time=0))
             print(second2tick(semiq*duration, 960, tempo2bpm(tempo)))
-            track.append(Message('note_on', note=pitch + 57, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
+            track.append(Message('note_on', note=pitch + 54, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
             
         mid.save(name)    
         

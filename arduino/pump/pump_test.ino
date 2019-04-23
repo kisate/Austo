@@ -1,14 +1,14 @@
 void setup() {
-  pinMode(11, OUTPUT); //Pump
-    pinMode(9, OUTPUT);  //Valve
+  pinMode(15, OUTPUT); //Pump
+    pinMode(13, OUTPUT);  //Valve
 }
 
 void loop() {
 
-  digitalWrite(9, LOW);
+  digitalWrite(13, LOW);
   // digitalWrite(11, HIGH);
   delay(1000);
-  digitalWrite(11, LOW);
+  digitalWrite(13, HIGH);
   delay(1000);
 
 //   digitalWrite(48, LOW);
