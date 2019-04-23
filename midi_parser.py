@@ -1,6 +1,6 @@
 import mido
 
-mid = mido.MidiFile('midi/Hedwigs_Theme.mid')
+mid = mido.MidiFile('midi/hp.mid')
 melody = []
 tempo = 0
 for msg in mid:
@@ -9,7 +9,7 @@ for msg in mid:
     elif msg.type == "set_tempo":
         tempo = mido.tempo2bpm(msg.tempo)
 beat = 60/tempo
-times = [6*beat, 5*beat, 4*beat, 3*beat, 2.5*beat, 2*beat, 3*beat/2, beat, 3*beat/4, beat/2, beat/4]
+times = [beat/4, 2*beat/4, 3*beat/4, 4*beat/4, 5*beat/4, 6*beat/4, 7*beat/4]
 last_note = -1
 note_time = 0
 note_on = False
@@ -19,26 +19,23 @@ print(times)
 
 
 for msg in mid:
-    if msg.type == 'note_on' or msg.type == 'note_off':
-        print(msg)
-        if last_note == -1 : 
-            last_note = msg.note
-        else:
-            if msg.velocity > 0:
-                note_time += msg.time
+    print(msg)
+    # if msg.type == 'note_on' or msg.type == 'note_off':
+    #     print(msg)
+    #     if last_note == -1 : 
+    #         last_note = msg.note
+    #     else:
+    #         if msg.velocity > 0:
+    #             note_time += msg.time
 
-                for i, x in enumerate(times):
-                    if abs(x-note_time)/note_time < 0.000001:
-                        melody.append([(last_note - 57) % 12, i])
-                        print (abs(x-note_time)/note_time)
-                        break        
+    #             melody.append([(last_note - 57) % 12, int(4*note_time/beat)])        
 
-                # melody.append([(last_note - 57) % 12, times.index(note_time)])
-                last_note = msg.note
-                note_time = 0
+    #             # melody.append([(last_note - 57) % 12, times.index(note_time)])
+    #             last_note = msg.note
+    #             note_time = 0
 
-            else:
-                note_time += msg.time
+    #         else:
+    #             note_time += msg.time
 
         
 

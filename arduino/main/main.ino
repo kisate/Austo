@@ -45,8 +45,7 @@ short seq_length = 0;
 
 
 short tempo = 100;
-uint16_t beat = 500;
-uint16_t times[] = {6*beat, 5*beat, 4*beat, 3*beat, 2.5*beat, 2*beat, 3*beat/2, beat, 3*beat/4, beat/2, beat/4};
+uint16_t semiq = 125;
 
 
 void setup()
@@ -223,9 +222,9 @@ void loop() {
         {
             pick_note(sequence[i][0]);
             digitalWrite(13, LOW);
-            delay(uint16_t(times[sequence[i][1]]*0.95));
-            digitalWrite(13, HIGH);
-            delay(uint16_t(times[sequence[i][1]]*0.05));
+            delay(uint16_t(sequence[i][1]*semiq);
+            // digitalWrite(13, HIGH);
+            // delay(uint16_t(sequence[i][1]]*semiq));
         }
     }
 

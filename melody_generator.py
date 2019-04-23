@@ -47,7 +47,25 @@ names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
 
 maj_pentatonic_scale = [0, 2, 4, 7, 9]
 min_pentatonic_scale = [0, 3, 5, 7, 10]
-probs = [2, 3, 1, 3, 2]
+
+
+scales = [
+    [0, 2, 4, 5, 7, 9, 11], #maj
+    [0, 2, 3, 5, 7, 8, 10] #min
+]
+
+probs = [2, 4, 5, 0.1, 5, 4, 2]
+
+tension_border = 12
+tensions = [
+    [0, 2, 3, 2, 1, 2, 6],
+    [-10, 2, 1, -5, -5, 4, 5],
+    [-8, 2, 2, -6, -5, 3, 4],
+    [-6, 3, 2, 1, -5, 2, 3],
+    [-4, 3, 2, 1, 1, 2, 3],
+    [-4, 3, 2, -2, -4, 2, 3],
+    [-6, 2, 3, -2, -3, 2, 4],
+]
 
 class MelodyGenerator():
     
@@ -65,77 +83,89 @@ class MelodyGenerator():
         self.chords = {}
         self.init_chords(self.chords)      
 
-    def get_next(self, current) : 
-        total = sum(probs)
+    def get_next(self, current, tension) : 
+        cur_probs = probs.copy()
+        cur_tensions = tensions[current]
+
+        for i in range(len(cur_probs)):
+            if tension < tension_border:
+                if cur_tensions[(current + i - 3) % 7] < 0:
+                    cur_probs[i] *= 0.2*tension
+                else:
+                    cur_probs[i] *= 1.1*(max(1, tension_border + 1 - tension - cur_tensions[i]*0.2))
+            else :
+                if cur_tensions[(current + i - 3) % 7] < 0:
+                    cur_probs[i] *= 1.02*tension
+                else:
+                    cur_probs[i] *= 0.1
+        
+
+
+        total = sum(cur_probs)
         chosen = random.uniform(0, total)
         cumulative = 0
 
-        for i, x in enumerate(probs):
+        for i, x in enumerate(cur_probs):
             cumulative += x
             if cumulative > chosen:
-                return (i + current - 2) % 5
+                return (i + current - 3) % 7
 
 
 
-    def generate(self, chord_seq, beats_per_chord=16):
+    def generate(self, chord, beats_per_chord=12):
 
-        seq_len = len(chord_seq)
+        melody = [[chord // 2, 4]]
+        tension = 0
+        semiqs_left = (beats_per_chord - 2)*4
+        prev_step = 0
 
-        matches = [list(set(self.chords[names[chord_seq[i]]]) & set(self.chords[names[chord_seq[(i+1) % seq_len]]])) for i in range(seq_len)]
-    
-        melody = []
-
-        for i, chord in enumerate(chord_seq):
-            time = [chord // 2] * beats_per_chord
-            if len(matches[i]) > 0:
-                time[beats_per_chord-1] = matches[i][random.randint(0, len(matches[i]) - 1)]
-            if chord % 2 == 0:
-                prev_step = random.randint(0, 4)
-                time[0] = (time[0] + maj_pentatonic_scale[prev_step]) % 12
-                for j in range(1, beats_per_chord):
-                    next_step = self.get_next(prev_step)
-                    
-                    while ((time[j] + maj_pentatonic_scale[prev_step]) % 12 in [4, 6]) :
-                        next_step = self.get_next(prev_step)
-
-                    time[j] = (time[j] + maj_pentatonic_scale[prev_step]) % 12
-                    prev_step = next_step
-            else :
-                prev_step = random.randint(0, 4)
-                time[0] = (time[0] + min_pentatonic_scale[prev_step]) % 12
-                for j in range(1, beats_per_chord):
-                    prev_step = self.get_next(prev_step)
-                    time[j] = (time[j] + min_pentatonic_scale[prev_step]) % 12
+        while semiqs_left > 0:
+            next_step = self.get_next(prev_step, tension)
             
-            for x in time:
-                melody.append(x)
-                melody.append(5)
+            while (scales[chord % 2][next_step] + chord // 2 in [4, 6]) :
+                next_step = self.get_next(prev_step, tension)
+
+            # print(prev_step, next_step)
+            tension += tensions[prev_step][next_step]
+            tension = max(0, tension)
+            if next_step == 0:
+                tension = 0
             
-                
-    
+            length = random.randint(2, min(6, max(2, 8 - tension)))
+            length = min(length, semiqs_left)
+            semiqs_left -= length
+            melody.append([chord // 2 + scales[chord % 2][next_step], length])
+        
+            prev_step = next_step
+
+        melody.append([chord // 2, 4])
+
         return melody
 
     def write_midi(self, melody, name = 'melody.mid'):
-        from midiutil import MIDIFile
+        from mido import Message, MidiFile, MidiTrack, MetaMessage, tempo2bpm, second2tick
 
-        track    = 0
-        channel  = 0
-        time     = 0  
-        last     = time  # In beats
-        tempo    = 120   # In BPM
-        volume   = 100  # 0-127, as per the MIDI standard
+        tempo = 120
+
+
+        mid = MidiFile(ticks_per_beat=120)
+        track = MidiTrack()
+        mid.tracks.append(track)
+
+        track.append(MetaMessage('set_tempo', tempo = int(tempo2bpm(tempo)), time=0))
+        
+
+        
 
         beat = 60/tempo
-        times = [4*beat, 3*beat, 2*beat, 3*beat/2, beat, beat/2, 3*beat/4, beat/4]
-
-        MyMIDI = MIDIFile(1)  # One track, defaults to format 1 (tempo track is created
-                            # automatically)
-        MyMIDI.addTempo(track, time, tempo)
+        semiq = beat/4
 
         for note in melody:
             pitch, duration = note
-            MyMIDI.addNote(track, channel, pitch + 57, last + times[duration], times[duration], volume)
-            last += times[duration]
 
-        with open(name, "wb") as output_file:
-            MyMIDI.writeFile(output_file)
+            track.append(Message('note_on', note=pitch + 57, velocity=80, time=0))
+            print(second2tick(semiq*duration, 960, tempo2bpm(tempo)))
+            track.append(Message('note_on', note=pitch + 57, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
+            
+        mid.save(name)    
+        
