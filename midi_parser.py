@@ -1,6 +1,6 @@
 import mido
 
-mid = mido.MidiFile('midi/hp.mid')
+mid = mido.MidiFile('midi/Hedwigs_Theme.mid')
 melody = []
 tempo = 0
 for msg in mid:
@@ -20,31 +20,31 @@ print(times)
 
 for msg in mid:
     print(msg)
-    # if msg.type == 'note_on' or msg.type == 'note_off':
-    #     print(msg)
-    #     if last_note == -1 : 
-    #         last_note = msg.note
-    #     else:
-    #         if msg.velocity > 0:
-    #             note_time += msg.time
+    if msg.type == 'note_on' or msg.type == 'note_off':
+        print(msg)
+        if last_note == -1 : 
+            last_note = msg.note
+        else:
+            if msg.velocity > 0:
+                note_time += msg.time
 
-    #             melody.append([(last_note - 57) % 12, int(4*note_time/beat)])        
+                melody.append([(last_note - 57) % 12, int(4*note_time/beat)])        
 
-    #             # melody.append([(last_note - 57) % 12, times.index(note_time)])
-    #             last_note = msg.note
-    #             note_time = 0
+                # melody.append([(last_note - 57) % 12, times.index(note_time)])
+                last_note = msg.note
+                note_time = 0
 
-    #         else:
-    #             note_time += msg.time
+            else:
+                note_time += msg.time
 
         
 
-# from melody_generator import MelodyGenerator
-# gen = MelodyGenerator()
-# gen.write_midi(melody, "midi/hp.mid")
+from melody_generator import MelodyGenerator
+gen = MelodyGenerator()
+gen.write_midi(melody, "midi/hp.mid")
 
-# from midi2audio import FluidSynth
-# FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('midi/hp.mid', 'midi/hp.wav')
+from midi2audio import FluidSynth
+FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('midi/hp.mid', 'midi/hp.wav')
 
 
 print(melody)

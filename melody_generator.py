@@ -54,7 +54,7 @@ scales = [
     [0, 2, 3, 5, 7, 8, 10] #min
 ]
 
-probs = [2, 4, 5, 0.1, 5, 4, 2]
+probs = [3, 6, 5, 0.1, 5, 6, 2]
 
 tension_border = 12
 tensions = [
@@ -92,7 +92,7 @@ class MelodyGenerator():
                 if cur_tensions[(current + i - 3) % 7] < 0:
                     cur_probs[i] *= 0.2*tension
                 else:
-                    cur_probs[i] *= 1.1*(max(1, tension_border + 1 - tension - cur_tensions[i]*0.2))
+                    cur_probs[i] *= 1.2*(max(1, tension_border + 1 - tension - cur_tensions[i]*0.2))
             else :
                 if cur_tensions[(current + i - 3) % 7] < 0:
                     cur_probs[i] *= 1.02*tension
@@ -112,7 +112,7 @@ class MelodyGenerator():
 
 
 
-    def generate(self, chord, beats_per_chord=12):
+    def generate(self, chord, beats_per_chord=8):
 
         melody = [[chord // 2, 4]]
         tension = 0
@@ -131,7 +131,7 @@ class MelodyGenerator():
             if next_step == 0:
                 tension = 0
             
-            length = random.randint(2, min(6, max(2, 8 - tension)))
+            length = random.randint(2, min(4, max(2, tension_border - tension)))
             length = min(length, semiqs_left)
             semiqs_left -= length
             melody.append([chord // 2 + scales[chord % 2][next_step], length])
