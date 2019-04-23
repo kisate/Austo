@@ -28,7 +28,7 @@ for msg in mid:
             if msg.velocity > 0:
                 note_time += msg.time
 
-                melody.append([(last_note - 57) % 12, int(4*note_time/beat)])        
+                melody.extend([(last_note - 57) % 12, int(4*note_time/beat)])        
 
                 # melody.append([(last_note - 57) % 12, times.index(note_time)])
                 last_note = msg.note
@@ -39,17 +39,17 @@ for msg in mid:
 
         
 
-from melody_generator import MelodyGenerator
-gen = MelodyGenerator()
-gen.write_midi(melody, "midi/hp.mid")
+# from melody_generator import MelodyGenerator
+# gen = MelodyGenerator()
+# gen.write_midi(melody, "midi/hp.mid")
 
-from midi2audio import FluidSynth
-FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('midi/hp.mid', 'midi/hp.wav')
+# from midi2audio import FluidSynth
+# FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('midi/hp.mid', 'midi/hp.wav')
 
 
 print(melody)
 
-melody.append([12, 0])
+melody.extend([12, 0])
 
 import serial, time
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
@@ -57,6 +57,6 @@ time.sleep(1) #give the connection a second to settle
 # arduino.write(b"Hello from Python!")
 
 for x in melody:
-    arduino.write(x)
+    arduino.write([x])
     print(arduino.read())
 

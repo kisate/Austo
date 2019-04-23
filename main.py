@@ -5,7 +5,7 @@ import json
 import librosa
 import operator
 
-duration = 10
+duration = 5
 
 with open('train/data/config.json') as f:
     config = json.load(f)
@@ -79,43 +79,6 @@ try:
                 global waiting 
                 waiting = False
 
-            # if (mean > 0.1):
-            #     y = np.array([x[0] for x in indata])
-            #     ind = 0
-            #     while (y[ind] < 0.1):
-            #         ind += 1
-            #     y = y[ind:]
-            #     ind = len(y)
-            #     while (y[ind - 1] < 0.1):
-            #         ind -= 1
-            #     y = y[:ind]
-
-            #     print(y)
-
-            #     chroma_orig = librosa.feature.chroma_cqt(y=y, sr=samplerate)
-
-            #     onset_env = librosa.onset.onset_strength(y, sr=samplerate)
-            #     tempo = librosa.beat.tempo(onset_envelope=onset_env, sr=samplerate)
-
-            #     print(tempo)
-
-            #     l = len(chroma_orig[0])
-
-            #     features = []
-
-            #     for i in range(l//5):
-            #         buf = []
-            #         for j in range(i*5, min(l, (i+1)*5)):
-            #             buf.extend([chroma_orig[x][j] for x in range(12)])
-            #         features.append(buf)
-
-            #     dfeats = xgb.DMatrix(features)
-            #     y_pred = bst.predict(dfeats)
-                
-            #     for x in y_pred:
-            #         if (max(x) > 0.7) : print("{} {}".format(max(x), names[x.argmax(axis=0)]))
-            #         else : print("{} {}?".format(max(x), names[x.argmax(axis=0)]))
-
         else:
             print('no input')
 
@@ -188,14 +151,6 @@ for x in y_pred:
         print("{} {}?".format(max(x), names[chord]))
         chords_in_recording.append(-1)
 
-
-    # for chord in scores.keys():
-    #     if scores[chord] == 3:
-    #         chords_in_recording[i] = chord
-    #         chords_in_recording[i + 1] = chord
-    #         chords_in_recording[i + 2] = chord
-    #         chords_in_recording[i + 3] = chord
-
 scale = ('A', 0)
 amount = 0
 counts = {}
@@ -246,48 +201,12 @@ from melody_generator import MelodyGenerator
 gen = MelodyGenerator()
 
 melody = gen.generate(sequence[:4])
-# melody.append(12)
-
-# import serial, time
-# arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
-# time.sleep(1) #give the connection a second to settle
-# arduino.write(b"Hello from Python!")
-
-# arduino.write(melody)
-
-
-# gen.write_midi(melody)
-
 
 print('playing')
-
-# from midi2audio import FluidSynth
-# FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('melody.mid', 'melody.wav')
-
-# try:
-#     import sounddevice as sd
-#     import soundfile as sf
-#     print('wav')
-#     data, fs = sf.read('melody.wav', dtype='float32')
-#     data = data
-#     seq = []
-#     seq.extend(data)
-#     seq.extend(data)
-#     seq.extend(data)
-#     seq.extend(data)
-#     print(len(data))
-#     print(len(seq))
-#     while True:
-#         sd.play(np.array(seq), fs)
-#         status = sd.wait()
-# except KeyboardInterrupt:
-#     print('\nInterrupted by user')
-# except Exception as e:
-#     print(type(e).__name__ + ': ' + str(e))
+print(melody)
 
 
-melody.append(12)
-melody.append(0)
+melody.extend([12, 0])
 
 import serial, time
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
@@ -295,6 +214,7 @@ time.sleep(1) #give the connection a second to settle
 # arduino.write(b"Hello from Python!")
 
 for x in melody:
-    arduino.write([x])
+    
+    arduino.write(x)
     print(arduino.read())
 

@@ -112,9 +112,9 @@ class MelodyGenerator():
 
 
 
-    def generate(self, chord, beats_per_chord=8):
+    def process_chord(self, chord, beats_per_chord=8):
 
-        melody = [[chord // 2, 4]]
+        melody = [chord // 2, 4]
         tension = 0
         semiqs_left = (beats_per_chord - 2)*4
         prev_step = 0
@@ -134,12 +134,21 @@ class MelodyGenerator():
             length = random.randint(2, min(4, max(2, tension_border - tension)))
             length = min(length, semiqs_left)
             semiqs_left -= length
-            melody.append([chord // 2 + scales[chord % 2][next_step], length])
+            melody.append((chord // 4 + scales[chord % 2][next_step]) % 12)
+            melody.append(length)
         
             prev_step = next_step
 
-        melody.append([chord // 2, 4])
+        melody.append(chord // 2)
+        melody.append(4)
 
+        return melody
+
+    def generate(self, sequence):
+        melody = []
+        for chord in sequence:
+            part = self.process_chord(chord)
+            melody.extend(part)
         return melody
 
     def write_midi(self, melody, name = 'melody.mid'):

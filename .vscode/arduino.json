@@ -1,6 +1,6 @@
 {
     "port": "/dev/ttyUSB0",
     "board": "arduino:avr:megaADK",
-    "sketch": "arduino/pneumo/test.ino"
+    "sketch": "arduino/main/main.ino"
 
 }

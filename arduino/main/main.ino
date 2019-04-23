@@ -45,7 +45,7 @@ short seq_length = 0;
 
 
 short tempo = 100;
-uint16_t semiq = 125;
+uint16_t semiq = 200;
 
 
 void setup()
@@ -202,7 +202,9 @@ int get_pulse(int angle)
 void loop() {
 	if(state == 0 && Serial.available() > 1) {
 		unsigned note = Serial.read();
+        Serial.write(note);
         unsigned dur = Serial.read();
+        Serial.write(dur);
 		
         if (note > 11) state = 1;
 
@@ -211,7 +213,7 @@ void loop() {
             sequence[seq_length][0] = note;
             sequence[seq_length][1] = dur;
             seq_length ++;
-            Serial.write(note);
+            
         }
 	}
 
@@ -221,8 +223,9 @@ void loop() {
         for (int i = 0; i < seq_length; ++i)
         {
             pick_note(sequence[i][0]);
-            digitalWrite(13, LOW);
-            delay(uint16_t(sequence[i][1]*semiq);
+            digitalWrite(PUMP, LOW);
+            digitalWrite(VALVE, LOW);
+            delay(uint16_t(sequence[i][1]*semiq));
             // digitalWrite(13, HIGH);
             // delay(uint16_t(sequence[i][1]]*semiq));
         }
