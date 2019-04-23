@@ -1,6 +1,6 @@
 import mido
 
-mid = mido.MidiFile('midi/Hedwigs_Theme.mid')
+mid = mido.MidiFile('midi/shepherd.mid')
 melody = []
 tempo = 0
 for msg in mid:
@@ -12,6 +12,7 @@ beat = 60/tempo
 times = [beat/4, 2*beat/4, 3*beat/4, 4*beat/4, 5*beat/4, 6*beat/4, 7*beat/4]
 last_note = -1
 note_time = 0
+pre_time = 0
 note_on = False
 
 print(tempo)
@@ -21,12 +22,15 @@ print(times)
 for msg in mid:
     print(msg)
     if msg.type == 'note_on' or msg.type == 'note_off':
-        print(msg)
+        # print(msg)
         if last_note == -1 : 
             last_note = msg.note
         else:
             if msg.velocity > 0:
+                pre_time = note_time
                 note_time += msg.time
+
+                print(pre_time/note_time)
 
                 melody.extend([(last_note - 57) % 12, int(4*note_time/beat)])        
 
@@ -35,6 +39,7 @@ for msg in mid:
                 note_time = 0
 
             else:
+                pre_time = note_time
                 note_time += msg.time
 
         
@@ -45,6 +50,10 @@ for msg in mid:
 
 # from midi2audio import FluidSynth
 # FluidSynth('midi/Wii_Grand_Piano.sf2').midi_to_audio('midi/hp.mid', 'midi/hp.wav')
+
+
+from melody_generator import MelodyGenerator
+gen = MelodyGenerator()
 
 
 print(melody)

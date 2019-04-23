@@ -112,9 +112,9 @@ class MelodyGenerator():
 
 
 
-    def process_chord(self, chord, beats_per_chord=8):
+    def process_chord(self, chord, beats_per_chord=16):
 
-        melody = [chord // 2, 4]
+        melody = [chord // 4, 4]
         tension = 0
         semiqs_left = (beats_per_chord - 2)*4
         prev_step = 0
@@ -139,7 +139,7 @@ class MelodyGenerator():
         
             prev_step = next_step
 
-        melody.append(chord // 2)
+        melody.append(chord // 4)
         melody.append(4)
 
         return melody
@@ -149,6 +149,8 @@ class MelodyGenerator():
         for chord in sequence:
             part = self.process_chord(chord)
             melody.extend(part)
+            # part = self.process_chord(chord)
+            # melody.extend(part)
         return melody
 
     def write_midi(self, melody, name = 'melody.mid'):
@@ -169,8 +171,8 @@ class MelodyGenerator():
         beat = 60/tempo
         semiq = beat/4
 
-        for note in melody:
-            pitch, duration = note
+        for i in range(len(melody)//2):
+            pitch, duration = melody[2*i], melody[1+2*i]
 
             track.append(Message('note_on', note=pitch + 57, velocity=80, time=0))
             print(second2tick(semiq*duration, 960, tempo2bpm(tempo)))

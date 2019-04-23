@@ -1,13 +1,12 @@
-
-void setup() {
-	Serial.begin(115200); // use the same baud-rate as the python side
+void setup()
+{
+	pinMode(3, OUTPUT);
 }
 
-int a = 180;
-int b = 180; 
-
-void loop() {
-	Serial.print(a);
+void loop()
+{
+	digitalWrite(3, LOW);
 	delay(1000);
-	a += 1;
+	digitalWrite(3, LOW);
+	delay(500);
 }

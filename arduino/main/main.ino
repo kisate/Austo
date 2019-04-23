@@ -33,7 +33,7 @@ short positions[8][2] = {
     {75, 100}, // палец болтается
     {75, 100}, // перетянуть
     {75, 100},
-    {25, 0},
+    {30, 0},
     {25, 0}};
 
 
@@ -42,6 +42,7 @@ short servos[] = {3, 2, 0, 1, 6, 5, 7, 4};
 short state = 0;
 short sequence[100][2];
 short seq_length = 0;
+short prefix = 0;
 
 
 short tempo = 100;
@@ -206,7 +207,14 @@ void loop() {
         unsigned dur = Serial.read();
         Serial.write(dur);
 		
-        if (note > 11) state = 1;
+        if (note > 11) 
+        {
+            digitalWrite(PUMP, LOW);
+            digitalWrite(VALVE, HIGH);
+            delay(1000);
+               
+            state = 1;
+        }
 
         else 
         {
@@ -219,15 +227,25 @@ void loop() {
 
     else if (state == 1)
     {
+
+        short passed = 0;
         // digitalWrite(11, LOW);
-        for (int i = 0; i < seq_length; ++i)
+        for (int i = prefix; i < seq_length; ++i)
         {
             pick_note(sequence[i][0]);
             digitalWrite(PUMP, LOW);
             digitalWrite(VALVE, LOW);
-            delay(uint16_t(sequence[i][1]*semiq));
+            delay(uint16_t(sequence[i][1]*semiq*1));
+            passed += sequence[i][1];
+            if (passed >= 32) 
+            {
+                digitalWrite(VALVE, HIGH);
+                delay(semiq);    
+                passed = 0;
+            }
+            if (prefix < 4) prefix ++;
             // digitalWrite(13, HIGH);
-            // delay(uint16_t(sequence[i][1]]*semiq));
+            // // delay(uint16_t(sequence[i][1]*semiq*0.05));
         }
     }
 

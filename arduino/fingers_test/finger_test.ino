@@ -26,10 +26,10 @@ short positions[8][2] = {
     {75, 100}, // палец болтается
     {75, 100},
     {75, 100},
-    {25, 0},
+    {30, 0},
     {25, 0}};
 
-short servos[] = {3, 2, 0, 1, 6, 5, 7, 4};
+short servos[] = {3, 2, 0, 1, 6, 5, 7, 4, 8};
 
 short state = 0;
 short sequence[100];
@@ -180,6 +180,7 @@ int get_pulse(int angle)
 // void setup() {
 // 	Serial.begin(115200);
 // }
+
 void loop() {
 	if(Serial.available() > 1) {
 		unsigned s = Serial.read();
@@ -188,11 +189,24 @@ void loop() {
         // Serial.write(s);
         // Serial.write(angle);
         // if (angle > 20) 
-        pwm.setPWM(servos[s], 0, get_pulse(positions[s][angle]));
+        pwm.setPWM(servos[s], 0, get_pulse(angle));
         // else 
         // pwm.setPWM(servos[s], 0, SERVOMIN);
         // pick_note(s);
         // delay(times[angle]);
         // Serial.write()
 	}
+
+    // for (int note = 0; note < 12; ++note)
+    // {
+    //     pick_note(note);
+    //     delay(2000);
+    // }
+    
+    // for (int note = 11; note >= 0; --note)
+    // {
+    //     pick_note(note);
+    //     delay(2000);
+    // }
+
 }

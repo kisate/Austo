@@ -16,7 +16,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  530 // this is the 'maximum' pulse length count (out of 4096)
 
 // our servo # counter
-uint8_t servonum = 0;
+uint8_t servonum = 8;
 
 void setup() {
   Serial.begin(9600);
@@ -59,6 +59,6 @@ void loop() {
 
   delay(500);
 
-  servonum ++;
-  if (servonum > 3) servonum = 0;
+  // servonum ++;
+  // if (servonum > 8) servonum = 0;
 }

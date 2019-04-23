@@ -13,7 +13,7 @@ void setup()
 
 void loop()
 {
-  lower_arms();
+  rise_arms();
 }
 
 void lower_arms()

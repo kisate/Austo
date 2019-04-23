@@ -42,6 +42,10 @@ classes = {
 names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
  'D#', 'Dm#', 'E', 'Em', 'F', 'Fm', 'F#', 'Fm#', 'G', 'Gm', 'G#', 'Gm#']
 
+mscales = [
+    [0, 2, 4, 5, 7, 9, 11], #maj
+    [0, 2, 3, 5, 7, 8, 10] #min
+]
 
 scales = {}
 
@@ -205,16 +209,20 @@ melody = gen.generate(sequence[:4])
 print('playing')
 print(melody)
 
+prefix = [sequence[0] // 4, 4, (sequence[0] // 4 + mscales[chord % 2][3]) % 12, 4, (sequence[0] // 4 + mscales[chord % 2][4]) % 12, 4, (sequence[0] // 4 + mscales[chord % 2][5]) % 12, 4]
+
 
 melody.extend([12, 0])
+
+prefix.extend(melody)
 
 import serial, time
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
 time.sleep(1) #give the connection a second to settle
 # arduino.write(b"Hello from Python!")
 
-for x in melody:
+for x in prefix:
     
-    arduino.write(x)
+    arduino.write([x])
     print(arduino.read())
 
