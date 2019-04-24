@@ -45,6 +45,7 @@ short state = 0;
 short sequence[100][2];
 short seq_length = 0;
 short prefix = 0;
+short replays = 0;
 
 
 short tempo = 100;
@@ -143,6 +144,7 @@ void loop() {
     if (state == 0 && Serial.available() > 0)
     {
         Serial.read();
+        
 
         for (int i = 45; i > 20; --i)
         {
@@ -159,11 +161,13 @@ void loop() {
         }
 
         state = 1;
+        Serial.write(1);
     }
 
     else if (state == 1 && Serial.available() > 0)
     {
         Serial.read();
+        
 
         for (int i = 45; i > 20; --i)
         {
@@ -211,6 +215,7 @@ void loop() {
         delay(500);
 
         state = 2;
+        Serial.write(1);
         digitalWrite(PUMP, LOW);
         digitalWrite(VALVE, HIGH);
     }
@@ -236,7 +241,7 @@ void loop() {
             digitalWrite(VALVE, HIGH);
             delay(1000);
                
-            state = 3;
+            state = 4;
         }
 
         else 
@@ -248,7 +253,7 @@ void loop() {
         }
 	}
 
-    else if (state == 3)
+    else if (state == 4)
     {
 
         short passed = 0;
@@ -265,7 +270,7 @@ void loop() {
             
             passed += sequence[i][1];
             
-            if (passed >= 32) 
+            if (passed >= 16) 
             {
                 digitalWrite(VALVE, HIGH);
                 delay(semiq);    
@@ -274,6 +279,75 @@ void loop() {
             if (prefix < 4) prefix ++;
             // digitalWrite(13, HIGH);
             // // delay(uint16_t(sequence[i][1]*semiq*0.05));
+        }
+
+        replays ++;
+        if (replays == 3)
+        {
+            state = 5;
+            Serial.write(1);
+        }
+    }
+
+    else if(state == 5 && Serial.available() > 1) {
+        digitalWrite(LCD, LOW);
+		unsigned note = Serial.read();
+        Serial.write(note);
+        unsigned dur = Serial.read();
+        Serial.write(dur);
+		
+        if (note > 11) 
+        {
+            
+            digitalWrite(PUMP, LOW);
+            digitalWrite(VALVE, HIGH);
+            delay(1000);
+               
+            state = 6;
+        }
+
+        else 
+        {
+            sequence[seq_length][0] = note;
+            sequence[seq_length][1] = dur;
+            seq_length ++;
+            
+        }
+	}
+
+    else if (state == 6)
+    {
+
+        short passed = 0;
+        // digitalWrite(11, LOW);
+        for (int i = prefix; i < seq_length; ++i)
+        {
+            pick_note(sequence[i][0]);
+            digitalWrite(PUMP, LOW);
+            digitalWrite(VALVE, LOW);
+            delay(uint16_t(sequence[i][1]*semiq*0.95));
+            // digitalWrite(PUMP, HIGH);
+            digitalWrite(VALVE, HIGH);
+            delay(uint16_t(sequence[i][1]*semiq*0.05));
+            
+            passed += sequence[i][1];
+            
+            if (passed >= 16) 
+            {
+                digitalWrite(VALVE, HIGH);
+                delay(semiq);    
+                passed = 0;
+            }
+            if (prefix < 4) prefix ++;
+            // digitalWrite(13, HIGH);
+            // // delay(uint16_t(sequence[i][1]*semiq*0.05));
+        }
+
+        replays ++;
+        if (replays == 3)
+        {
+            state = 7;
+            Serial.write(1);
         }
     }
 

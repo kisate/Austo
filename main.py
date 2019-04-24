@@ -63,11 +63,12 @@ import serial, time
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
 time.sleep(1) #give the connection a second to settle
 arduino.write([1])
+arduino.read()
 
 wait_sound()
 
 arduino.write([1])
-time.sleep(1)
+arduino.read()
 
 wait_sound()
 
@@ -94,5 +95,9 @@ for x in prefix:
     
     arduino.write([x])
     print(arduino.read())
-    
+
+
+# Код Макса где-то здесь
+
+
 

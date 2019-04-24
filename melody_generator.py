@@ -91,11 +91,13 @@ class MelodyGenerator():
             
             length = random.randint(2, min(4, max(2, tension_border - tension)))
             length = min(length, semiqs_left)
-            if (semiqs_left % 16 > 0):
-                length = min(length, semiqs_left % 16)
+            if (semiqs_left % 16 > 0 and length > semiqs_left % 16):
+                length = semiqs_left % 16
+                print(semiqs_left)
             semiqs_left -= length
             melody.append((chord // 2 + scales[chord % 2][next_step]) % 12)
             melody.append(length)
+            
         
             prev_step = next_step
 
@@ -135,7 +137,7 @@ class MelodyGenerator():
             pitch, duration = melody[2*i], melody[1+2*i]
 
             track.append(Message('note_on', note=pitch + 54, velocity=80, time=0))
-            print(second2tick(semiq*duration, 960, tempo2bpm(tempo)))
+        
             track.append(Message('note_on', note=pitch + 54, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
             
         mid.save(name)    
