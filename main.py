@@ -13,7 +13,7 @@ from bbox_ops import *
 from midi_parser import parse_midi
 from stuff import *
 
-duration = 5
+duration = 10
 
 mscales = [
     [0, 2, 4, 5, 7, 9, 11], #maj
@@ -27,16 +27,21 @@ train_dir = config['train_dir']
 
 samplerate = sd.query_devices(None, 'input')['default_samplerate']
 
+
+import serial, time
+arduino = serial.Serial('/dev/ttyUSB0', 115200)
+time.sleep(1) #give the connection a second to settle
+
 bst = xgb.Booster()
 bst.load_model('0001.model')
 
-model = classifier.Classifier(r'/home/jovvik/repos/bt_parking/frozenFinal/frozen_inference_graph.pb')
+# model = classifier.Classifier(r'/home/jovvik/repos/bt_parking/frozenFinal/frozen_inference_graph.pb')
 
-NXTs = {
-    'zhmih': nxt.NXT('/dev/rfcomm0'),
-    'zhizha': nxt.NXT('/dev/rfcomm1'),
-    'nya': nxt.NXT('/dev/rfcomm2')
-}
+# NXTs = {
+#     'zhmih': nxt.NXT('/dev/rfcomm0'),
+#     'zhizha': nxt.NXT('/dev/rfcomm1'),
+#     'nya': nxt.NXT('/dev/rfcomm2')
+# }
 
 waiting = True
 print('waiting')
@@ -68,13 +73,15 @@ def wait_sound():
             pass
                 
 
-    print('recording {} seconds'.format(duration))
+    print('waiting for sound')
 
 wait_sound()
 
-import serial, time
-arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
-time.sleep(1) #give the connection a second to settle
+arduino.write([1])
+arduino.read()
+
+wait_sound()
+
 arduino.write([1])
 arduino.read()
 
@@ -98,17 +105,16 @@ from melody_generator import MelodyGenerator
 gen = MelodyGenerator()
 melody = gen.generate(sequence[:4])
 
-prefix = [sequence[0] // 2, 4, (sequence[0] // 2 + mscales[sequence[0] % 2][3]) % 12, 4, (sequence[0] // 2 + mscales[sequence[0] % 2][4]) % 12, 4, (sequence[0] // 2 + mscales[sequence[0] % 2][5]) % 12, 4]
-melody.extend([12, 0])
-
-prefix.extend(melody)
+melody.extend([20, 0])
 
 
+for i in range(len(melody) // 2):
+    
+    arduino.write([melody[i*2], melody[i*2 + 1]])
+    print(arduino.read())
 
-arduino.read() # Ожидание сообщения 
-
-
-
+wait_sound()
+arduino.write([1])
 
 nechduino = serial.Serial('/dev/ttyACM0', 115200, timeout=.1)
 time.sleep(1) #give the connection a second to settle
@@ -199,13 +205,13 @@ while waiting:
 
 
 melody = parse_midi('midi/ode.mid')
-prefix = [3, 4, 7, 4, 10, 4, 3, 4]
-prefix.extend(melody)
-prefix.extend([12, 0])
 
-for x in prefix:
+for i in range(len(melody) // 2):
     
-    arduino.write([x])
+    arduino.write([melody[i*2], melody[i*2 + 1]])
     print(arduino.read())
+
+wait_sound()
+arduino.write([1])
 
 arduino.read()

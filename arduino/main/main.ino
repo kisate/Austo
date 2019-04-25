@@ -30,13 +30,13 @@ short fingerings[12][8] = {
 short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
     {0, 0},
-    {25, 0},
-    {75, 100}, 
-    {75, 100}, // палец болтается
-    {75, 100}, // перетянуть
-    {75, 100},
     {30, 0},
-    {25, 0}};
+    {70, 100}, 
+    {70, 100}, 
+    {70, 100},
+    {70, 100},
+    {30, 0},
+    {30, 0}};
 
 
 short servos[] = {3, 2, 0, 1, 6, 5, 7, 4};
@@ -45,11 +45,11 @@ short state = 0;
 short sequence[100][2];
 short seq_length = 0;
 short prefix = 0;
-short replays = 0;
 
 
 short tempo = 100;
-uint16_t semiq = 200;
+uint16_t semiq1 = 125;
+uint16_t semiq2 = 200;
 
 
 
@@ -146,103 +146,111 @@ void loop() {
     {
         Serial.read();
         
+        lower_arms();
 
-        for (int i = 45; i > 20; --i)
+        for (int i = 45; i > 22; --i)
         {
             pwm.setPWM(8, 0, get_pulse(i));
-            delay(60);
+            delay(50);
         }
         
-        delay(4000);
+        delay(2000);
 
-        for (int i = 20; i <= 45; ++i)
+        for (int i = 22; i <= 45; ++i)
         {
             pwm.setPWM(8, 0, get_pulse(i));
-            delay(60);
-        }
-
-        state = 1;
-        Serial.write(1);
-    }
-
-    else if (state == 1 && Serial.available() > 0)
-    {
-        Serial.read();
-        
-
-        for (int i = 45; i > 20; --i)
-        {
-            pwm.setPWM(8, 0, get_pulse(i));
-            delay(60);
-        }
-        
-        delay(4000);
-
-        for (int i = 20; i <= 45; ++i)
-        {
-            pwm.setPWM(8, 0, get_pulse(i));
-            delay(60);
+            delay(50);
         }
 
         raise_arms();
+        
 
         digitalWrite(PUMP, LOW);    
         digitalWrite(VALVE, HIGH);
 
         delay(1000);
 
-        pick_note(3);
-        digitalWrite(VALVE, LOW);
-        delay(500);
-        
-        pick_note(7);
-        delay(500);
+        state = 1;
 
-        pick_note(10);
-        delay(500);
-
-        digitalWrite(VALVE, HIGH);
-
-        delay(4000);
-
-        pick_note(10);
-        digitalWrite(VALVE, LOW);
-        delay(500);
-        
-        pick_note(2);
-        delay(500);
-
-        pick_note(5);
-        delay(500);
-
-        state = 2;
         Serial.write(1);
-        digitalWrite(PUMP, LOW);
-        digitalWrite(VALVE, HIGH);
     }
 
-    else if(state == 2 && Serial.available() > 0)
+    else if (state == 1 && Serial.available() > 0)
     {
         Serial.read();
-        digitalWrite(LCD, HIGH);
+
+        pick_note(3);
+        digitalWrite(VALVE, LOW);
+        delay(1000);
+        
+        pick_note(7);
+        delay(1000);
+
+        pick_note(10);
+        delay(1000);
+
+        digitalWrite(VALVE, HIGH);
+
+        state = 2;
+
+    }
+
+    else if (state == 2 && Serial.available() > 0)
+    {   
+        Serial.read();
+
+        pick_note(10);
+        digitalWrite(VALVE, LOW);
+        delay(1000);
+        
+        pick_note(2);
+        delay(1000);
+
+        pick_note(5);
+        delay(1000);
+
+
+        digitalWrite(PUMP, HIGH);
+        digitalWrite(VALVE, HIGH);
+
+        for (int i = 45; i > 22; --i)
+        {
+            pwm.setPWM(8, 0, get_pulse(i));
+            delay(50);
+        }
+
+        Serial.write(1);
+
         state = 3;
     }
 
-	else if(state == 3 && Serial.available() > 1) {
+    else if(state == 3 && Serial.available() > 0)
+    {
+        Serial.read();
+        digitalWrite(LCD, HIGH);
+        state = 4;
+    }
+
+	else if(state == 4 && Serial.available() > 1) {
         digitalWrite(LCD, LOW);
 		unsigned note = Serial.read();
-        Serial.write(note);
         unsigned dur = Serial.read();
-        Serial.write(dur);
+        Serial.write(note);
 		
-        if (note > 11) 
+        if (dur == 0) 
         {
             
+            for (int i = 22; i <= 45; ++i)
+            {
+                pwm.setPWM(8, 0, get_pulse(i));
+                delay(50);
+            }
+
             digitalWrite(PUMP, LOW);
             digitalWrite(VALVE, HIGH);
             delay(1000);
                
-            state = 4;
+            state = 5;
         }
 
         else 
@@ -254,57 +262,49 @@ void loop() {
         }
 	}
 
-    else if (state == 4)
+    else if (state == 5 && Serial.available() > 0)
     {
-
+        Serial.read();
         short passed = 0;
-        // digitalWrite(11, LOW);
         for (int i = prefix; i < seq_length; ++i)
         {
-            pick_note(sequence[i][0]);
-            digitalWrite(PUMP, LOW);
-            digitalWrite(VALVE, LOW);
-            delay(uint16_t(sequence[i][1]*semiq*0.95));
-            // digitalWrite(PUMP, HIGH);
-            digitalWrite(VALVE, HIGH);
-            delay(uint16_t(sequence[i][1]*semiq*0.05));
-            
-            passed += sequence[i][1];
-            
-            if (passed >= 16) 
+            if (sequence[i][0] == 12)
             {
                 digitalWrite(VALVE, HIGH);
-                delay(semiq);    
-                passed = 0;
+                digitalWrite(PUMP, HIGH);
+                
+                delay(uint16_t(sequence[i][1]*semiq2*1));
             }
-            if (prefix < 4) prefix ++;
-            // digitalWrite(13, HIGH);
-            // // delay(uint16_t(sequence[i][1]*semiq*0.05));
+
+            else 
+            {
+                pick_note(sequence[i][0]);
+                digitalWrite(PUMP, LOW);
+                digitalWrite(VALVE, LOW);
+                delay(uint16_t(sequence[i][1]*semiq2*0.95));
+                digitalWrite(VALVE, HIGH);
+                delay(uint16_t(sequence[i][1]*semiq2*0.05));
+            }
         }
 
-        replays ++;
-        if (replays == 3)
-        {
-            state = 5;
-            Serial.write(1);
-        }
+        state = 6;
+        Serial.write(1);
     }
 
-    else if(state == 5 && Serial.available() > 1) {
+    else if(state == 6 && Serial.available() > 1) {
         digitalWrite(LCD, LOW);
 		unsigned note = Serial.read();
-        Serial.write(note);
         unsigned dur = Serial.read();
-        Serial.write(dur);
+        Serial.write(note);
 		
-        if (note > 11) 
+        if (dur == 0) 
         {
             
             digitalWrite(PUMP, LOW);
             digitalWrite(VALVE, HIGH);
             delay(1000);
                
-            state = 6;
+            state = 7;
             replays = 0;
         }
 
@@ -317,42 +317,35 @@ void loop() {
         }
 	}
 
-    else if (state == 6)
-    {
+    else if (state == 7 && Serial.available() > 0)
+    {   
+        Serial.read();
 
         short passed = 0;
-        // digitalWrite(11, LOW);
         for (int i = prefix; i < seq_length; ++i)
         {
-            pick_note(sequence[i][0]);
-            digitalWrite(PUMP, LOW);
-            digitalWrite(VALVE, LOW);
-            delay(uint16_t(sequence[i][1]*semiq*0.95));
-            // digitalWrite(PUMP, HIGH);
-            digitalWrite(VALVE, HIGH);
-            delay(uint16_t(sequence[i][1]*semiq*0.05));
-            
-            passed += sequence[i][1];
-            
-            if (passed >= 16) 
+            if (sequence[i][0] == 12)
             {
+                
                 digitalWrite(VALVE, HIGH);
-                delay(semiq);    
-                passed = 0;
+                digitalWrite(PUMP, HIGH);
+                
+                delay(uint16_t(sequence[i][1]*semiq1*1));
             }
-            if (prefix < 4) prefix ++;
-            // digitalWrite(13, HIGH);
-            // // delay(uint16_t(sequence[i][1]*semiq*0.05));
+
+            else 
+            {
+                pick_note(sequence[i][0]);
+                digitalWrite(PUMP, LOW);
+                digitalWrite(VALVE, LOW);
+                delay(uint16_t(sequence[i][1]*semiq1*0.95));
+                // digitalWrite(PUMP, HIGH);
+                digitalWrite(VALVE, HIGH);
+                delay(uint16_t(sequence[i][1]*semiq1*0.05));
+            }
         }
 
-        replays ++;
-        if (replays == 3)
-        {
-            state = 7;
-            Serial.write(1);
-        }
-    }
-
-    // Serial.print("A");
-    
+        state = 8;
+        Serial.write(1);
+    }   
 }

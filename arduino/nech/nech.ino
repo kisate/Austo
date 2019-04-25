@@ -261,15 +261,9 @@ void loop() {
 
   if (Serial.available() > 0)
   {
-    // rotate(50, 120);
-    // delay(4000);
     forward(55, 2000);
     delay(4000);
     left(25, 2000);
-    delay(4000);
-    backward(55, 2000);
-    delay(4000);
-    right(25, 2000);
     delay(4000);
     Serial.read();
   }

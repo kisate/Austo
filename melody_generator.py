@@ -11,8 +11,9 @@ scales = [
     [0, 2, 3, 5, 7, 8, 10] #min
 ]
 
-probs = [6, 5, 0.1, 5, 6]
-length_probs = [2, 4, 1, 1]
+probs = [6, 7, 1, 7, 6]
+length_probs = [1, 7, 2, 1]
+pause_prob = 0
 
 tension_border = 12
 
@@ -46,30 +47,36 @@ class MelodyGenerator():
                 return i
 
 
-    def process_chord(self, chord, beats_per_chord=16):
+    def process_chord(self, chord, beats_per_chord=8):
 
         melody = [chord // 2, 4]
-        tension = 0
+        length_left = 12
         semiqs_left = (beats_per_chord - 2)*4
         prev_step = 0
 
         while semiqs_left > 0:
             next_step = self.get_next(prev_step)
             
-            while (scales[chord % 2][next_step] + chord // 2 in [4, 6]) :
+            while (scales[chord % 2][next_step] + chord // 2 in [4, 6, 9, 11, 1]) :
                 next_step = self.get_next(prev_step)
 
             # print(prev_step, next_step)
 
             length = self.get_random_index(length_probs) + 1
 
-            length = min(length, semiqs_left)
-            if (semiqs_left % 16 > 0 and length > semiqs_left % 16):
-                length = semiqs_left % 16
-                print(semiqs_left)
-                
+            length = min(length, semiqs_left, length_left)
+
             semiqs_left -= length
-            melody.append((chord // 2 + scales[chord % 2][next_step]) % 12)
+            length_left -= length
+
+            if (length_left == 0) :
+                length_left = 16
+
+
+            if (random.random() < pause_prob):
+                melody.append(12)
+            else:
+                melody.append((chord // 2 + scales[chord % 2][next_step]) % 12)
             melody.append(length)
             
         
@@ -106,13 +113,17 @@ class MelodyGenerator():
 
         beat = 60/tempo
         semiq = beat/4
+        pause = 0
 
         for i in range(len(melody)//2):
             pitch, duration = melody[2*i], melody[1+2*i]
 
-            track.append(Message('note_on', note=pitch + 54, velocity=80, time=0))
-        
-            track.append(Message('note_on', note=pitch + 54, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
-            
+            if (pitch < 12):
+                track.append(Message('note_on', note=pitch + 66, velocity=80, time=pause))
+                pause = 0
+                track.append(Message('note_on', note=pitch + 66, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
+            else :
+                pause=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))
+
         mid.save(name)    
         

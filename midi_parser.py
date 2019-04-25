@@ -61,7 +61,9 @@ def parse_midi(path_to_midi):
 
 # print(melody)
 
-# melody.extend([12, 0])
+# melody = parse_midi('midi/ode.mid')
+
+# melody.extend([20, 0])
 
 # import serial, time
 # arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)

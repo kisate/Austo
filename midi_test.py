@@ -1,8 +1,6 @@
 from mido import MidiFile
 
-mid = MidiFile('midi/twinkle_twinkle.mid')
+mid = MidiFile('midi/ode.mid')
 
-for i, track in enumerate(mid.tracks):
-    print('Track {}: {}'.format(i, track.name))
-    for msg in track:
-        print(msg)
+for msg in mid:
+    print(int(1000*msg.time))
