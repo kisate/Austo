@@ -188,9 +188,10 @@ void loop() {
         delay(1000);
 
         pick_note(10);
-        delay(1000);
+        delay(500);
 
         digitalWrite(VALVE, HIGH);
+        delay(500);
         digitalWrite(PUMP, HIGH);
 
         state = 2;
@@ -213,12 +214,10 @@ void loop() {
         delay(1000);
 
         pick_note(5);
-        delay(1000);
-
-        pick_note(3);
+        delay(500);
 
         digitalWrite(VALVE, HIGH);
-        delay(100);
+        delay(500);
         digitalWrite(PUMP, HIGH);
         pick_note(3);
 
@@ -297,7 +296,11 @@ void loop() {
             }
         }
 
+        digitalWrite(VALVE, HIGH);
+        digitalWrite(PUMP, HIGH);
+        seq_length = 0;
         state = 6;
+        
         Serial.write(1);
     }
 
@@ -347,13 +350,15 @@ void loop() {
                 pick_note(sequence[i][0]);
                 digitalWrite(PUMP, LOW);
                 digitalWrite(VALVE, LOW);
-                delay(uint16_t(sequence[i][1]*semiq1*0.95));
+                delay(uint16_t(sequence[i][1]*semiq1*0.9));
                 // digitalWrite(PUMP, HIGH);
                 digitalWrite(VALVE, HIGH);
-                delay(uint16_t(sequence[i][1]*semiq1*0.05));
+                delay(uint16_t(sequence[i][1]*semiq1*0.1));
             }
         }
 
+        digitalWrite(VALVE, HIGH);
+        digitalWrite(PUMP, HIGH);
         state = 8;
         Serial.write(1);
     }   
