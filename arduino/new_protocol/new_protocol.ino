@@ -1,9 +1,9 @@
-byte buffer[50];
+#define SERVOMIN 80
+#define SERVOMAX 600
+#define PUMP 15 //HIGH -- off, LOW -- on
+#define VALVE 13 //HIGH -- off, LOW -- on
 
-void setup()
-{
-    Serial.begin(115200);
-}
+byte buffer[50];
 
 bool read_meta = false;
 bool read_seq = false;
@@ -12,6 +12,55 @@ uint16_t sequence[100][3];
 unsigned seq_length = 0; 
 unsigned tempo = 0;
 unsigned total_seq_length = 0;
+
+short fingerings[12][8] = {
+    {1, 1, 1, 0, 0, 0, 0, 0},  //A
+    {1, 1, 0, 1, 1, 0, 0, 0},  //A#
+    {1, 1, 0, 0, 0, 0, 0, 0},  //B
+    {1, 1, 1, 1, 1, 1, 1, 1},  //C
+    {1, 1, 1, 1, 1, 1, 1, 0},  //C#
+    {1, 1, 1, 1, 1, 1, 1, 0},  //D
+    {1, 1, 1, 1, 1, 1, 0, 0},  //D#
+    {1, 1, 1, 1, 1, 1, 0, 0},  //E
+    {1, 1, 1, 1, 1, 0, 0, 0},  //F
+    {1, 1, 1, 1, 0, 1, 1, 1},  //F#
+    {1, 1, 1, 1, 0, 0, 0, 0},  //G
+    {1, 1, 1, 0, 1, 1, 0, 0}}; //G#
+short scale[] = {3, 5, 7, 8, 10, 0, 2};
+short positions[8][2] = {
+    {0, 0},
+    {30, 0},
+    {70, 100}, 
+    {70, 100}, // палец болтается
+    {70, 100}, // перетянуть
+    {70, 100},
+    {30, 0},
+    {30, 0}};
+
+
+short servos[] = {3, 2, 0, 1, 6, 5, 7, 4};
+
+
+void setup()
+{
+    Serial.begin(115200);
+
+    pwm.begin();
+    pwm.setPWMFreq(60); // Analog servos run at ~60 Hz updates
+    
+    pinMode(PUMP, OUTPUT); 
+    pinMode(VALVE, OUTPUT);  
+    
+    delay(100);
+    
+    digitalWrite(PUMP, HIGH);
+    digitalWrite(VALVE, HIGH);
+    
+    delay(100);
+    pick_note(3);
+    delay(100);
+}
+
 
 void loop()
 {
@@ -45,9 +94,15 @@ void loop()
 
             delay(msg[2]);
             pick_note(msg[0]);
+            
             if (msg[1] > 0)
             {
-                
+                digitalWrite(VALVE, LOW);    
+                digitalWrite(PUMP, LOW);
+            }
+            else 
+            {
+                digitalWrite(VALVE, HIGH);
             } 
 
         }

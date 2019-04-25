@@ -12,7 +12,7 @@ scales = [
 ]
 
 probs = [6, 7, 1, 7, 6]
-length_probs = [1, 7, 2, 1]
+length_probs = [0.5, 9, 4, 1]
 pause_prob = 0
 
 tension_border = 12
@@ -57,7 +57,7 @@ class MelodyGenerator():
         while semiqs_left > 0:
             next_step = self.get_next(prev_step)
             
-            while (scales[chord % 2][next_step] + chord // 2 in [4, 6, 9, 11, 1]) :
+            while (scales[chord % 2][next_step] + chord // 2 in [4, 6, 9, 11, 1, 3]) :
                 next_step = self.get_next(prev_step)
 
             # print(prev_step, next_step)
@@ -76,7 +76,7 @@ class MelodyGenerator():
             if (random.random() < pause_prob):
                 melody.append(12)
             else:
-                melody.append((chord // 2 + scales[chord % 2][next_step]) % 12)
+                melody.append((chord // 2 + pentatonic_scales[chord % 2][next_step]) % 12)
             melody.append(length)
             
         

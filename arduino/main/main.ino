@@ -146,7 +146,7 @@ void loop() {
     {
         Serial.read();
         
-        lower_arms();
+        //lower_arms();
 
         for (int i = 45; i > 22; --i)
         {
@@ -164,9 +164,8 @@ void loop() {
 
         raise_arms();
         
-
-        digitalWrite(PUMP, LOW);    
         digitalWrite(VALVE, HIGH);
+        digitalWrite(PUMP, LOW);    
 
         delay(1000);
 
@@ -179,6 +178,8 @@ void loop() {
     {
         Serial.read();
 
+        delay(500);
+
         pick_note(3);
         digitalWrite(VALVE, LOW);
         delay(1000);
@@ -190,8 +191,10 @@ void loop() {
         delay(1000);
 
         digitalWrite(VALVE, HIGH);
+        digitalWrite(PUMP, HIGH);
 
         state = 2;
+        Serial.write(1);
 
     }
 
@@ -199,8 +202,11 @@ void loop() {
     {   
         Serial.read();
 
+        delay(500);
+
         pick_note(10);
         digitalWrite(VALVE, LOW);
+        digitalWrite(PUMP, LOW);
         delay(1000);
         
         pick_note(2);
@@ -209,15 +215,12 @@ void loop() {
         pick_note(5);
         delay(1000);
 
+        pick_note(3);
 
-        digitalWrite(PUMP, HIGH);
         digitalWrite(VALVE, HIGH);
-
-        for (int i = 45; i > 22; --i)
-        {
-            pwm.setPWM(8, 0, get_pulse(i));
-            delay(50);
-        }
+        delay(100);
+        digitalWrite(PUMP, HIGH);
+        pick_note(3);
 
         Serial.write(1);
 
@@ -227,8 +230,14 @@ void loop() {
     else if(state == 3 && Serial.available() > 0)
     {
         Serial.read();
+        for (int i = 45; i > 22; --i)
+        {
+            pwm.setPWM(8, 0, get_pulse(i));
+            delay(50);
+        }
         digitalWrite(LCD, HIGH);
         state = 4;
+        Serial.write(1);
     }
 
 	else if(state == 4 && Serial.available() > 1) {
@@ -246,8 +255,9 @@ void loop() {
                 delay(50);
             }
 
-            digitalWrite(PUMP, LOW);
             digitalWrite(VALVE, HIGH);
+            digitalWrite(PUMP, LOW);
+            
             delay(1000);
                
             state = 5;
@@ -305,7 +315,6 @@ void loop() {
             delay(1000);
                
             state = 7;
-            replays = 0;
         }
 
         else 

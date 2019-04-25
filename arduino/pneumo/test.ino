@@ -15,7 +15,7 @@ void setup()
 
 void loop()
 {
-  rise_arms();
+  lower_arms();
 }
 
 void lower_arms()
