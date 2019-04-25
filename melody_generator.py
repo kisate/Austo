@@ -12,6 +12,7 @@ scales = [
 ]
 
 probs = [6, 5, 0.1, 5, 6]
+length_probs = [2, 4, 1, 1]
 
 tension_border = 12
 
@@ -31,33 +32,18 @@ class MelodyGenerator():
         self.chords = {}
         self.init_chords(self.chords)      
 
-    def get_next(self, current, tension) : 
-        cur_probs = probs.copy()
-        cur_tensions = tensions[current]
-
-        for i in range(len(cur_probs)):
-            if tension < tension_border:
-                if cur_tensions[(current + i - 3) % 7] < 0:
-                    cur_probs[i] *= 0.2*tension
-                else:
-                    cur_probs[i] *= 1.2*(max(1, tension_border + 1 - tension - cur_tensions[i]*0.2))
-            else :
-                if cur_tensions[(current + i - 3) % 7] < 0:
-                    cur_probs[i] *= 1.02*tension
-                else:
-                    cur_probs[i] *= 0.1
+    def get_next(self, current) :         
+        return (self.get_random_index(probs) + current - 2) % 5
         
-
-
-        total = sum(cur_probs)
+    def get_random_index(self, probabillities):
+        total = sum(probabillities)
         chosen = random.uniform(0, total)
         cumulative = 0
 
-        for i, x in enumerate(cur_probs):
+        for i, x in enumerate(probabillities):
             cumulative += x
             if cumulative > chosen:
-                return (i + current - 3) % 7
-
+                return i
 
 
     def process_chord(self, chord, beats_per_chord=16):
@@ -68,22 +54,20 @@ class MelodyGenerator():
         prev_step = 0
 
         while semiqs_left > 0:
-            next_step = self.get_next(prev_step, tension)
+            next_step = self.get_next(prev_step)
             
             while (scales[chord % 2][next_step] + chord // 2 in [4, 6]) :
-                next_step = self.get_next(prev_step, tension)
+                next_step = self.get_next(prev_step)
 
             # print(prev_step, next_step)
-            tension += tensions[prev_step][next_step]
-            tension = max(0, tension)
-            if next_step == 0:
-                tension = 0
-            
-            length = random.randint(2, min(4, max(2, tension_border - tension)))
+
+            length = self.get_random_index(length_probs) + 1
+
             length = min(length, semiqs_left)
             if (semiqs_left % 16 > 0 and length > semiqs_left % 16):
                 length = semiqs_left % 16
                 print(semiqs_left)
+                
             semiqs_left -= length
             melody.append((chord // 2 + scales[chord % 2][next_step]) % 12)
             melody.append(length)
