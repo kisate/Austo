@@ -1,3 +1,6 @@
+#include <Adafruit_PWMServoDriver.h>
+
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN 80
 #define SERVOMAX 600
 #define PUMP 15 //HIGH -- off, LOW -- on
@@ -61,6 +64,19 @@ void setup()
     delay(100);
 }
 
+void pick_note(uint8_t note)
+{
+    for (int i = 0; i < 8; ++i)
+    {
+        int p = get_pulse(positions[i][fingerings[note][i]]);
+        pwm.setPWM(servos[i], 0, p);
+    }
+}
+
+int get_pulse(int angle)
+{
+    return map(angle, 0, 100, SERVOMIN, SERVOMAX);
+}
 
 void loop()
 {
@@ -75,6 +91,7 @@ void loop()
     if (read_meta && not read_seq && Serial.available() > 3)
     {   
         Serial.readBytes(buffer, 4);
+        Serial.write(1);
 
         unsigned note = (unsigned) buffer[0];
         unsigned velocity = (unsigned) buffer[1];
@@ -90,12 +107,11 @@ void loop()
     {
         for (int i = 0; i < seq_length; ++i)
         {
-            uint16_t msg[3] = sequence[i];
 
-            delay(msg[2]);
-            pick_note(msg[0]);
+            delay(sequence[i][2]);
+            pick_note(sequence[i][0]);
             
-            if (msg[1] > 0)
+            if (sequence[i][1] > 0)
             {
                 digitalWrite(VALVE, LOW);    
                 digitalWrite(PUMP, LOW);

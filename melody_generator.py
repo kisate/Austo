@@ -119,9 +119,9 @@ class MelodyGenerator():
             pitch, duration = melody[2*i], melody[1+2*i]
 
             if (pitch < 12):
-                track.append(Message('note_on', note=pitch + 66, velocity=80, time=pause))
+                track.append(Message('note_on', note=pitch + 69, velocity=80, time=pause))
                 pause = 0
-                track.append(Message('note_on', note=pitch + 66, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
+                track.append(Message('note_on', note=pitch + 69, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
             else :
                 pause=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))
 

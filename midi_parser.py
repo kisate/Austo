@@ -33,7 +33,7 @@ def parse_midi(path_to_midi):
 
                     print(pre_time/note_time)
 
-                    melody.extend([(last_note - 57) % 12, int(4*note_time/beat)])        
+                    melody.extend([(last_note - 69) % 12, int(4*note_time/beat)])        
 
                     # melody.append([(last_note - 57) % 12, times.index(note_time)])
                     last_note = msg.note
@@ -61,16 +61,16 @@ def parse_midi(path_to_midi):
 
 # print(melody)
 
-# melody = parse_midi('midi/ode.mid')
+melody = parse_midi('midi/ode.mid')
 
-# melody.extend([20, 0])
+melody.extend([20, 0])
 
-# import serial, time
-# arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
-# time.sleep(1) #give the connection a second to settle
-# # arduino.write(b"Hello from Python!")
+import serial, time
+arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
+time.sleep(1) #give the connection a second to settle
+# arduino.write(b"Hello from Python!")
 
-# for x in melody:
-#     arduino.write([x])
-#     print(arduino.read())
+for x in melody:
+    arduino.write([x])
+    print(arduino.read())
 
