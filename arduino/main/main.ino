@@ -52,6 +52,7 @@ short tempo = 100;
 uint16_t semiq = 200;
 
 
+
 void setup()
 {
     Serial.begin(115200);
@@ -152,7 +153,7 @@ void loop() {
             delay(60);
         }
         
-        delay(1000);
+        delay(4000);
 
         for (int i = 20; i <= 45; ++i)
         {
@@ -175,7 +176,7 @@ void loop() {
             delay(60);
         }
         
-        delay(1000);
+        delay(4000);
 
         for (int i = 20; i <= 45; ++i)
         {
@@ -202,7 +203,7 @@ void loop() {
 
         digitalWrite(VALVE, HIGH);
 
-        delay(3000);
+        delay(4000);
 
         pick_note(10);
         digitalWrite(VALVE, LOW);
@@ -304,6 +305,7 @@ void loop() {
             delay(1000);
                
             state = 6;
+            replays = 0;
         }
 
         else 

@@ -47,6 +47,23 @@ classes = {
 names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
  'D#', 'Dm#', 'E', 'Em', 'F', 'Fm', 'F#', 'Fm#', 'G', 'Gm', 'G#', 'Gm#']
 
+
+name_map = {
+    1:'nya',
+    2:'zhizha',
+    3:'zhmih'
+}
+
+color_map = {
+    1:(0,255,255),
+    2:(0,0,255),
+    3:(255,0,0)
+}
+
+MINDIST = 50 # minimal deviation in pix for NXT to move
+COMMAND_FREQ = 0.2 # 1 sec between commands to NXTs
+SPEED_COEF = 0.4 # speed per pixel of dist
+
 def process_recording(recording, samplerate, booster):
     y = np.array([x[0] for x in recording])
     print(y)
