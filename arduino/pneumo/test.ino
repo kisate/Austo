@@ -29,7 +29,7 @@ void lower_arms()
   digitalWrite(ARMSMOTORUP, LOW);
 }
 
-void rise_arms()
+void raise_arms()
 {
   while (digitalRead(UPBORDER) == 0)
   {

@@ -235,6 +235,8 @@ void loop() {
             delay(50);
         }
         digitalWrite(LCD, HIGH);
+        digitalWrite(VALVE, HIGH);
+        digitalWrite(PUMP, HIGH);
         state = 4;
         Serial.write(1);
     }

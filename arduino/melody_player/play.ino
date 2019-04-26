@@ -84,9 +84,8 @@ void loop()
     if (state == 0 && Serial.available() > 1)
     {
         unsigned note = Serial.read();
-        Serial.write(note);
         unsigned dur = Serial.read();
-        Serial.write(dur);
+        Serial.write(note);
 		
         if (dur == 0) 
         {

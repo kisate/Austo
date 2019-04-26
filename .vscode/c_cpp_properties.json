@@ -3,6 +3,9 @@
         {
             "name": "Linux",
             "includePath": [
+                "/home/tlab/Arduino/libraries/TimerOne",
+                "/home/tlab/Arduino/libraries/button",
+                "/home/tlab/Arduino/libraries/arduino_503710",
                 "/home/tlab/Arduino/libraries/Adafruit_PWM_Servo_Driver_Library/",
                 "/home/tlab/Downloads/arduino-1.8.8/tools/**",
                 "/home/tlab/Downloads/arduino-1.8.8/hardware/arduino/avr/**"

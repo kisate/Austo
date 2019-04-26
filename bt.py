@@ -25,9 +25,9 @@ class NXT():
 
 i = 0
 
-NXTs = {'zhmih': NXT('/dev/rfcomm0'),
+NXTs = {#'zhmih': NXT('/dev/rfcomm0'),
         # 'zhizha': NXT('/dev/rfcomm1'),
-        #'nya': NXT('/dev/rfcomm2')
+        'nya': NXT('/dev/rfcomm2')
         }
 
 while True:

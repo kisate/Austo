@@ -18,7 +18,7 @@ class NXT():
     def __init__(self, port, baud=9600):
         self.port = port
         self.stopped = False
-        self.ser = serial.Serial(port, baud)
+        self.ser = serial.Serial(port, baud, write_timeout=0)
         self.ready = False
         self.timeSinceLastComm = cv2.getTickCount()
         self.pos = -1, -1
@@ -35,15 +35,11 @@ class NXT():
             self.ser.write(buf)
             self.timeSinceLastComm = cv2.getTickCount()
         except:
-            print('Failed at sending')
-            self.reconnect()
+            self.send(vals_)
     
     def reconnect(self):
-        try:
-            self.ser.__del__()
-        except:
-            print('Failed at deleting')
-        self.ser = serial.Serial(self.port)
+        print('b')
+        self.ser = serial.Serial(self.port, write_timeout=0)
     
     def rotate(self):
         vals = [0, 0, 1]
@@ -56,7 +52,7 @@ class NXT():
 
 class Classifier(object):
     def __init__(self):
-        PATH_TO_MODEL = r'/home/jovvik/repos/bt_parking/frozenFinal/frozen_inference_graph.pb'
+        PATH_TO_MODEL = r'/home/tlab/Documents/models/frozen_inference_graph.pb'
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -94,9 +90,7 @@ def area(a):
 def midOfRect(r):
     return ( int((r[3] + r[1]) * 640) // 2, int((r[2] + r[0]) * 480) // 2)
 
-cap = cv2.VideoCapture(1)
-
-model = Classifier()
+cap = cv2.VideoCapture(0)
 
 NXTs = {
     'zhmih': NXT('/dev/rfcomm0'),
@@ -104,10 +98,14 @@ NXTs = {
     'nya': NXT('/dev/rfcomm2')
 }
 
+model = Classifier()
+
+a = input()
+
 name_map = {
-    1:'nya',
+    1:'zhmih',
     2:'zhizha',
-    3:'zhmih'
+    3:'nya'
 }
 
 color_map = {
@@ -129,7 +127,7 @@ while True:
         nxt.ready = False
 
     for idx, box in enumerate(boxes[0]):
-        if scores[0][idx]>0.85 and cnt < 3 and (classes[0][idx] not in c):
+        if scores[0][idx]>0.9 and cnt < 3 and (classes[0][idx] not in c):
             boxesOverlap = False
             for b in goodBoxes:
                 if (area(intersection(b, box)) / area(b) > 0.6):
@@ -148,8 +146,8 @@ while True:
             currNXT.ready = True
 
             currNXT.pos = midOfRect(box)
-            print(currNXT.pos)
-            print(currNXT.firstpos)
+            # print(currNXT.pos)
+            # print(currNXT.firstpos)
             if currNXT.firstpos[0] == -1:
                 currNXT.firstpos = midOfRect(box)
 
@@ -173,7 +171,7 @@ while True:
             cv2.putText(frame, name_map[currClass], (int(box[1]*640), int(box[0]*480)), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color_map[currClass],2)
 
     for name, nxt in NXTs.items():
-        if not nxt.ready and not nxt.stopped:
+        if not nxt.ready:
             nxt.stop()
             print(name + " stopped")
 

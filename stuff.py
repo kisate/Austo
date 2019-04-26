@@ -49,9 +49,9 @@ names = ['A', 'Am', 'A#', 'Am#', 'B', 'Bm', 'C', 'Cm', 'C#', 'Cm#', 'D', 'Dm', \
 
 
 name_map = {
-    1:'nya',
+    1:'zhmih',
     2:'zhizha',
-    3:'zhmih'
+    3:'nya'
 }
 
 color_map = {
