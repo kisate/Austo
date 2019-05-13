@@ -11,10 +11,10 @@ byte buffer[50];
 bool read_meta = false;
 bool read_seq = false;
 
-uint16_t sequence[100][3];
-unsigned seq_length = 0; 
+uint16_t sequence[1024][3];
+uint16_t seq_length = 0; 
 unsigned tempo = 0;
-unsigned total_seq_length = 0;
+uint16_t total_seq_length = 0;
 
 short fingerings[12][8] = {
     {1, 1, 1, 0, 0, 0, 0, 0},  //A
@@ -80,27 +80,34 @@ int get_pulse(int angle)
 
 void loop()
 {
-    if (not read_meta && not read_seq && Serial.available() > 1 )
-    {
-        Serial.readBytes(buffer, 2);
-        tempo = buffer[0];
-        total_seq_length = buffer[1];
-        read_meta = true;
-    }
-
-    if (read_meta && not read_seq && Serial.available() > 3)
+    if (not read_seq && Serial.available() > 3)
     {   
         Serial.readBytes(buffer, 4);
         Serial.write(1);
 
-        unsigned note = (unsigned) buffer[0];
-        unsigned velocity = (unsigned) buffer[1];
-        uint16_t msg_time = ((unsigned) buffer[2] << 8) | (unsigned) buffer[3]; 
-        sequence[seq_length][0] = note;
-        sequence[seq_length][1] = velocity;
-        sequence[seq_length][2] = msg_time;
-        seq_length++;
-        if (seq_length == total_seq_length) read_seq = true;    
+        if (not read_meta)
+        {
+            total_seq_length = ((unsigned) buffer[2]) << 8 | ((unsigned) buffer[3]);
+            read_meta = true;
+        }
+
+        else 
+        {
+            unsigned note = (unsigned) buffer[0];
+            unsigned velocity = (unsigned) buffer[1];
+            uint16_t msg_time = ((unsigned) buffer[2] << 8) | (unsigned) buffer[3]; 
+            sequence[seq_length][0] = note;
+            sequence[seq_length][1] = velocity;
+            sequence[seq_length][2] = msg_time;
+            seq_length++;
+            if (seq_length == total_seq_length) 
+            {
+                read_seq = true;  
+                digitalWrite(VALVE, HIGH);    
+                digitalWrite(PUMP, LOW);
+                delay(2000);
+            }
+        }  
     }
 
     if (read_seq)

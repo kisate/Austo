@@ -1,9 +1,10 @@
 import numpy as np
 import sounddevice as sd
 from stuff import *
+import json
 
 waiting = True
-duration = 10
+duration = 3
 print('waiting')
 
 def callback(indata, frames, time, status):

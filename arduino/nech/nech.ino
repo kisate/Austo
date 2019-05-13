@@ -271,12 +271,12 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
     speedich1 = speedich2 = speedich3 = speedich4 = 80;
     motor_go_time(-s, -s, -s, -s, timeichkekich);
   }
-  void rotate(int s, int timeichkekich)
+  void rotate_right(int s, int timeichkekich)
   {
     speedich1 = speedich2 = speedich3 = speedich4 = 80;
     motor_go_enc(-s, -s, s, s, timeichkekich);
   }
-  void rotate_right(int s, int timeichkekich)
+  void rotate(int s, int timeichkekich)
   {
     speedich1 = speedich2 = speedich3 = speedich4 = 80;
     motor_go_enc(s, s, -s,-s, timeichkekich);
@@ -324,10 +324,10 @@ void loop() {
     {
       delay(2000);
 
-      forward(20, 2000);
-      delay(1000);
-      right(10, 2000);
-      delay(1000);
+      forward(30, 2000);
+      delay(2000);
+      right(20, 2000);
+      delay(2000);
       Serial.write(1);
     }
     
@@ -343,6 +343,29 @@ void loop() {
     else if (cmd == 3)
     {
       wait_for_echo = true;
+    }
+    else if (cmd == 4)
+    {
+      while (true)
+      {
+        forward(70, 5000);
+      } 
+    }
+    else if (cmd == 5)
+    {
+
+      //delay(30000);
+
+      rotate_right(30, 30);
+      delay(500);
+      forward(40, 5000);
+      delay(500);
+      rotate(30, 60);
+      delay(500);
+      forward(40, 3000);
+      delay(500);
+      rotate(30, 90);
+      delay(500);
     }
   }
 

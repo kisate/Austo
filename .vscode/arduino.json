@@ -1,5 +1,5 @@
 {
-    "port": "/dev/ttyACM0",
+    "port": "/dev/ttyUSB0",
     "board": "arduino:avr:megaADK",
-    "sketch": "arduino/nech/nech.ino"
+    "sketch": "arduino/fingers_test/finger_test.ino"
 }

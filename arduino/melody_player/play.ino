@@ -77,6 +77,7 @@ void setup()
     delay(100);
     pick_note(3);
     delay(100);
+    pwm.setPWM(8, 0, get_pulse(45));
 }
 
 void loop()
@@ -136,7 +137,7 @@ void loop()
         digitalWrite(VALVE, HIGH);
         delay(4000);
 
-        if (replays == 3)
+        if (replays == 1)
         {
             state = 5;
             digitalWrite(PUMP, HIGH);

@@ -90,11 +90,10 @@ def area(a):
 def midOfRect(r):
     return ( int((r[3] + r[1]) * 640) // 2, int((r[2] + r[0]) * 480) // 2)
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 
 NXTs = {
     'zhmih': NXT('/dev/rfcomm0'),
-    'zhizha': NXT('/dev/rfcomm1'),
     'nya': NXT('/dev/rfcomm2')
 }
 
@@ -104,8 +103,7 @@ a = input()
 
 name_map = {
     1:'zhmih',
-    2:'zhizha',
-    3:'nya'
+    2:'nya'
 }
 
 color_map = {
@@ -127,7 +125,7 @@ while True:
         nxt.ready = False
 
     for idx, box in enumerate(boxes[0]):
-        if scores[0][idx]>0.9 and cnt < 3 and (classes[0][idx] not in c):
+        if scores[0][idx]>0.9 and cnt < 2 and classes[0][idx] != 3 and (classes[0][idx] not in c):
             boxesOverlap = False
             for b in goodBoxes:
                 if (area(intersection(b, box)) / area(b) > 0.6):

@@ -21,13 +21,13 @@ short fingerings[12][8] = {
 short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
     {0, 0},
-    {25, 0},
-    {75, 100}, 
-    {75, 100}, // палец болтается
-    {75, 100},
-    {75, 100},
     {30, 0},
-    {25, 0}};
+    {70, 100}, 
+    {70, 100}, 
+    {70, 100},
+    {70, 100},
+    {30, 0},
+    {30, 0}};
 
 short servos[] = {3, 2, 0, 1, 6, 5, 7, 4, 8};
 
@@ -54,6 +54,7 @@ void setup()
     delay(100);
     digitalWrite(13, LOW);
     digitalWrite(15, LOW);
+    pwm.setPWM(8, 0, get_pulse(45));
 }
 
 void pick_note(uint8_t note)
@@ -190,6 +191,21 @@ void loop() {
         // Serial.write(angle);
         // if (angle > 20) 
         pwm.setPWM(servos[s], 0, get_pulse(angle));
+        if (s == 11)
+        {
+            digitalWrite(13, HIGH);
+            digitalWrite(15, HIGH);
+        }
+        if (s == 12)
+        {
+            digitalWrite(13, LOW);
+            digitalWrite(15, LOW);
+            pwm.setPWM(8, 0, get_pulse(45));
+        }
+        if (s > 7)
+        {
+            pick_note(angle);
+        }
         // else 
         // pwm.setPWM(servos[s], 0, SERVOMIN);
         // pick_note(s);

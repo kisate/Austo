@@ -11,7 +11,7 @@ import threading
 import nxt
 import classifier
 from bbox_ops import *
-from midi_parser import parse_midi
+from midi_parser2 import parse_midi
 from stuff import *
 
 duration = 10
@@ -38,14 +38,13 @@ bst.load_model('0001.model')
 
 model = classifier.Classifier(r'/home/tlab/Documents/models/frozen_inference_graph.pb')
 
-cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture(1)
 
-_, frame = cap.read()
-boxes, scores, classes, num = model.get_classification(frame)
+# _, frame = cap.read()
+# boxes, scores, classes, num = model.get_classification(frame)
 
 NXTs = {
     'zhmih': nxt.NXT('/dev/rfcomm0'),
-    'zhizha': nxt.NXT('/dev/rfcomm1'),
     'nya': nxt.NXT('/dev/rfcomm2')
 }
 
@@ -62,7 +61,7 @@ def callback(indata, frames, time, status):
         mean = np.sqrt(np.mean(indata**2)) 
         print(mean)
 
-        if (mean > 0.1) :
+        if (mean > 0.02) :
             global waiting 
             waiting = False
 
@@ -124,7 +123,20 @@ for i in range(len(melody) // 2):
 
 wait_sound()
 arduino.write([1])
+waitingRotating = True
+
+def rotate():
+    global waitingRotating
+    while waitingRotating:
+        for _, nxt in NXTs.items():
+            nxt.rotate()
+        time.sleep(2.85)
+    print('a')
+        
+t = threading.Thread(target=rotate)
+t.start()
 arduino.read()
+waitingRotating = False
 
 nechduino = serial.Serial('/dev/ttyACM0', 115200)
 time.sleep(1) #give the connection a second to settle
@@ -144,96 +156,95 @@ def wait_a(a):
     waiting = True
     a.read()
     waiting = False
+    print('!!!!')
 
-t = threading.Thread(target=wait_a, args=(nechduino))
-# t.start()
 waiting = True
+t = threading.Thread(target=wait_a, args=(nechduino,))
+t.start()
 
 while waiting:
-    timer = cv2.getTickCount()
-    ok, frame = cap.read()
-    print('1')
-    boxes, scores, classes, num = model.get_classification(frame)
-    print('2')
-    cnt = 0
-    c = []
-    goodBoxes = []
+    # timer = cv2.getTickCount()
+    # ok, frame = cap.read()
+    # boxes, scores, classes, num = model.get_classification(frame)
+    # cnt = 0
+    # c = []
+    # goodBoxes = []
 
-    for _, nxt in NXTs.items():
-        nxt.ready = False
+    # for _, nxt in NXTs.items():
+    #     nxt.ready = False
 
-    for idx, box in enumerate(boxes[0]):
-        if scores[0][idx]>0.9 and cnt < 3 and (classes[0][idx] not in c):
-            boxesOverlap = False
-            for b in goodBoxes:
-                if (area(intersection(b, box)) / area(b) > 0.6):
-                    boxesOverlap = True
-                    print('overlapped')
-                    break
-            if boxesOverlap:
-                continue
+    # for idx, box in enumerate(boxes[0]):
+    #     if scores[0][idx]>0.9 and cnt < 2 and classes[0][idx] != 3 and (classes[0][idx] not in c):
+    #         boxesOverlap = False
+    #         for b in goodBoxes:
+    #             if (area(intersection(b, box)) / area(b) > 0.6):
+    #                 boxesOverlap = True
+    #                 print('overlapped')
+    #                 break
+    #         if boxesOverlap:
+    #             continue
 
-            goodBoxes.append(box)
-            c.append(classes[0][idx])
-            cnt+=1
+    #         goodBoxes.append(box)
+    #         c.append(classes[0][idx])
+    #         cnt+=1
 
-            currClass = int(classes[0][idx])
-            currNXT = NXTs[name_map[currClass]]
-            currNXT.ready = True
+    #         currClass = int(classes[0][idx])
+    #         currNXT = NXTs[name_map[currClass]]
+    #         currNXT.ready = True
 
-            currNXT.pos = midOfRect(box)
-            print(currNXT.pos)
-            print(currNXT.firstpos)
-            if currNXT.firstpos[0] == -1:
-                currNXT.firstpos = midOfRect(box)
+    #         currNXT.pos = midOfRect(box)
+    #         if currNXT.firstpos[0] == -1:
+    #             currNXT.firstpos = midOfRect(box)
 
-            diff = currNXT.firstpos[1] - currNXT.pos[1],  -currNXT.firstpos[0] + currNXT.pos[0]
-            angle = atan2(diff[0], diff[1]) / pi * 180
-            if angle < 0:
-                angle += 360
-            angle += 180
-            angle %= 360
-            dist = sqrt(diff[0] ** 2 + diff[1] ** 2)
+    #         diff = currNXT.firstpos[1] - currNXT.pos[1],  -currNXT.firstpos[0] + currNXT.pos[0]
+    #         angle = atan2(diff[0], diff[1]) / pi * 180
+    #         if angle < 0:
+    #             angle += 360
+    #         angle += 180
+    #         angle %= 360
+    #         dist = sqrt(diff[0] ** 2 + diff[1] ** 2)
 
-            cv2.arrowedLine(frame, currNXT.firstpos, currNXT.pos, (255, 255, 255))
-            # if (cv2.getTickCount() - currNXT.timeSinceLastComm) / cv2.getTickFrequency() > COMMAND_FREQ and dist > MINDIST:
-            if dist > MINDIST:
-                currNXT.send([int(angle), min(int(dist * SPEED_COEF), 100), int(COMMAND_FREQ * 10)])
-                # print(int(angle), min(int(dist * SPEED_COEF), 100), int(COMMAND_FREQ * 10))
-                currNXT.timeSinceLastComm = cv2.getTickCount()
+    #         cv2.arrowedLine(frame, currNXT.firstpos, currNXT.pos, (255, 255, 255))
+    #         # if (cv2.getTickCount() - currNXT.timeSinceLastComm) / cv2.getTickFrequency() > COMMAND_FREQ and dist > MINDIST:
+    #         if dist > MINDIST:
+    #             currNXT.send([int(angle), min(int(dist * SPEED_COEF), 100), int(COMMAND_FREQ * 10)])
+    #             # print(int(angle), min(int(dist * SPEED_COEF), 100), int(COMMAND_FREQ * 10))
+    #             currNXT.timeSinceLastComm = cv2.getTickCount()
 
-            cv2.rectangle(frame, (int(box[1]*640), int(box[0]*480)), (int(box[3]*640), int(box[2]*480)), color_map[currClass])
-            cv2.putText(frame, name_map[currClass], (int(box[1]*640), int(box[0]*480)), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color_map[currClass],2)
-            cv2.putText(frame, str(scores[0][idx]), (int(box[1]*640+80), int(box[0]*480)), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color_map[currClass],2)
+    #         cv2.rectangle(frame, (int(box[1]*640), int(box[0]*480)), (int(box[3]*640), int(box[2]*480)), color_map[currClass])
+    #         cv2.putText(frame, name_map[currClass], (int(box[1]*640), int(box[0]*480)), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color_map[currClass],2)
+    #         cv2.putText(frame, str(scores[0][idx]), (int(box[1]*640+80), int(box[0]*480)), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color_map[currClass],2)
 
-    for name, nxt in NXTs.items():
-        if not nxt.ready and not nxt.stopped:
-            nxt.stop()
-            print(name + " stopped")
+    # for name, nxt in NXTs.items():
+    #     if not nxt.ready and not nxt.stopped:
+    #         nxt.stop()
+    #         print(name + " stopped")
 
-    # calc FPS and draw it
-    fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
-    cv2.putText(frame, "FPS : " + str(int(fps)), (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2)
+    # # calc FPS and draw it
+    # fps = cv2.getTickFrequency() / (cv2.getTickCount() - timer)
+    # cv2.putText(frame, "FPS : " + str(int(fps)), (100,50), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50), 2)
 
-    cv2.imshow('frame', frame)
-    cv2.waitKey(1)
+    # cv2.imshow('frame', frame)
+    # cv2.waitKey(1)
+    pass
 
 
-nechduino.read()
+# nechduino.read()
 
 
 wait_sound()
 
-melody = parse_midi('midi/ode.mid')
+melody = parse_midi('midi/pirate2.mid')
 
-melody.extend([20, 0])
-
-for i in range(len(melody) // 2):
-    
-    arduino.write([melody[i*2], melody[i*2 + 1]])
-    print(arduino.read())
+for x in melody:
+    arduino.write([x[0]])
+    arduino.write([x[1]])
+    arduino.write([x[2] >> 8])
+    arduino.write([x[2] & 255])
+    arduino.read()
 
 wait_sound()
+nechduino.write([5])
 arduino.write([1])
 arduino.read()
 
