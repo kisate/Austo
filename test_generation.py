@@ -2,7 +2,7 @@ from melody_generator import MelodyGenerator
 
 gen = MelodyGenerator()
 
-melody = gen.generate([6, 1, 11, 20])
+melody = gen.generate([0, 19, 14, 18])
 
 melody.extend([12, 0])
 

@@ -14,6 +14,7 @@ scales = [
 probs = [6, 7, 1, 7, 6]
 length_probs = [0.5, 9, 4, 1]
 pause_prob = 0
+comp_state = 0
 
 tension_border = 12
 
@@ -33,7 +34,10 @@ class MelodyGenerator():
         self.chords = {}
         self.init_chords(self.chords)      
 
-    def get_next(self, current) :         
+    def gen_phrase(self, note, scale):
+        
+
+    def get_next(self, current) :  
         return (self.get_random_index(probs) + current - 2) % 5
         
     def get_random_index(self, probabillities):
@@ -51,7 +55,7 @@ class MelodyGenerator():
 
         melody = [chord // 2, 4]
         length_left = 12
-        semiqs_left = (beats_per_chord - 2)*4
+        semiqs_left = (beats_per_chord - 1)*4
         prev_step = 0
 
         while semiqs_left > 0:
