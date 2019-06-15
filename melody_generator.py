@@ -11,10 +11,6 @@ scales = [
     [0, 2, 3, 5, 7, 8, 10] #min
 ]
 
-probs = [6, 7, 1, 7, 6]
-length_probs = [0.5, 9, 4, 1]
-pause_prob = 0
-comp_state = 0
 
 tension_border = 12
 
@@ -34,11 +30,78 @@ class MelodyGenerator():
         self.chords = {}
         self.init_chords(self.chords)      
 
-    def gen_phrase(self, note, scale):
+    def gen_phrase(self, step, scale, semiqs_left, tone):
+        type_probs = [1, 2]
+        phrase_type = self.get_random_index(type_probs)
+        phrase = []
+        _phrase_length = 0
+        last_step = 0
+
+        if (phrase_type == 0):
+            phrase_length = min(8, semiqs_left)
+            _phrase_length = phrase_length
+            
+            probs = [2, 5, 0.5, 7, 3]
+            length_probs = [3, 2]
+
+
+            current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+            while (scale[current_step] + tone in [1, 3]) :
+                current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+            length = min(self.get_random_index(length_probs) + 1, phrase_length)
+            phrase.append((scale[current_step] + tone) % 12)
+            phrase.append(length)
+            phrase_length -= length
+
+            while phrase_length > 0:
+                current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+                # while (scale[current_step] + tone in [1, 3]) :
+                #    current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+                length = min(self.get_random_index(length_probs) + 1, phrase_length)
+                phrase.append((scale[current_step] + tone) % 12)
+                phrase.append(length)
+                phrase_length -= length
+                last_step = current_step
+
+        elif (phrase_type == 1):
+            phrase_length = min(6, semiqs_left)
+            _phrase_length = phrase_length
+            
+            probs = [2, 7, 0.2, 3, 5]
+            length_probs = [0, 0, 5, 2, 2]
+
+
+            current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+            # while (scale[current_step] + tone in [1, 3]) :
+            #     current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+            length = min(self.get_random_index(length_probs) + 1, phrase_length)
+            phrase.append((scale[current_step] + tone) % 12)
+            phrase.append(length)
+            phrase_length -= length
+
+            while phrase_length > 0:
+                current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+                while (scale[current_step] + tone in [1, 3]) :
+                   current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+                length = min(self.get_random_index(length_probs) + 1, phrase_length)
+                phrase.append((scale[current_step] + tone) % 12)
+                phrase.append(length)
+                phrase_length -= length
+                last_step = current_step
+
+        print(phrase_type)
+        return (_phrase_length, last_step, phrase)
+            
         
 
-    def get_next(self, current) :  
-        return (self.get_random_index(probs) + current - 2) % 5
+    def get_next(self, current, probs) :  
+        return (self.get_random_index(probs) + current - 2)
         
     def get_random_index(self, probabillities):
         total = sum(probabillities)
@@ -54,40 +117,16 @@ class MelodyGenerator():
     def process_chord(self, chord, beats_per_chord=8):
 
         melody = [chord // 2, 4]
-        length_left = 12
-        semiqs_left = (beats_per_chord - 1)*4
+        semiqs_left = (beats_per_chord - 1) * 4
         prev_step = 0
 
         while semiqs_left > 0:
-            next_step = self.get_next(prev_step)
             
-            while (scales[chord % 2][next_step] + chord // 2 in [1, 3]) :
-                next_step = self.get_next(prev_step)
-
-            # print(prev_step, next_step)
-
-            length = self.get_random_index(length_probs) + 1
-
-            length = min(length, semiqs_left, length_left)
-
-            semiqs_left -= length
-            length_left -= length
-
-            if (length_left == 0) :
-                length_left = 16
-
-
-            if (random.random() < pause_prob):
-                melody.append(12)
-            else:
-                melody.append((chord // 2 + pentatonic_scales[chord % 2][next_step]) % 12)
-            melody.append(length)
-            
-        
-            prev_step = next_step
-
-        melody.append(chord // 2)
-        melody.append(4)
+            scale = pentatonic_scales[chord % 2]
+            phrase_length, prev_step, phrase = self.gen_phrase(prev_step, scale, semiqs_left, chord // 2)
+            semiqs_left -= phrase_length
+            melody.extend(phrase)
+            print(phrase)
 
         return melody
 
