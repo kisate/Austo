@@ -57,7 +57,7 @@ class MelodyGenerator():
         while semiqs_left > 0:
             next_step = self.get_next(prev_step)
             
-            while (scales[chord % 2][next_step] + chord // 2 in [4, 6, 9, 11, 1, 3]) :
+            while (scales[chord % 2][next_step] + chord // 2 in [1, 3]) :
                 next_step = self.get_next(prev_step)
 
             # print(prev_step, next_step)
@@ -119,9 +119,9 @@ class MelodyGenerator():
             pitch, duration = melody[2*i], melody[1+2*i]
 
             if (pitch < 12):
-                track.append(Message('note_on', note=pitch + 69, velocity=80, time=pause))
+                track.append(Message('note_on', note=pitch + 60, velocity=80, time=pause))
                 pause = 0
-                track.append(Message('note_on', note=pitch + 69, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
+                track.append(Message('note_on', note=pitch + 60, velocity=0, time=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))))
             else :
                 pause=int(second2tick(semiq*duration, 120, tempo2bpm(tempo)))
 
