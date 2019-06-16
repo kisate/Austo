@@ -31,7 +31,7 @@ class MelodyGenerator():
         self.init_chords(self.chords)      
 
     def gen_phrase(self, step, scale, semiqs_left, tone):
-        type_probs = [1, 2]
+        type_probs = [1, 1, 1]
         phrase_type = self.get_random_index(type_probs)
         phrase = []
         _phrase_length = 0
@@ -41,64 +41,69 @@ class MelodyGenerator():
             phrase_length = min(8, semiqs_left)
             _phrase_length = phrase_length
             
-            probs = [2, 5, 0.5, 7, 3]
-            length_probs = [3, 2]
-
-
-            current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-            while (scale[current_step] + tone in [1, 3]) :
-                current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-
-            length = min(self.get_random_index(length_probs) + 1, phrase_length)
-            phrase.append((scale[current_step] + tone) % 12)
-            phrase.append(length)
-            phrase_length -= length
-
-            while phrase_length > 0:
-                current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-
-                # while (scale[current_step] + tone in [1, 3]) :
-                #    current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-
-                length = min(self.get_random_index(length_probs) + 1, phrase_length)
-                phrase.append((scale[current_step] + tone) % 12)
-                phrase.append(length)
-                phrase_length -= length
-                last_step = current_step
+            probs = [1, 3, 0, 7, 3]
+            length_probs = [2, 3, 1]
 
         elif (phrase_type == 1):
             phrase_length = min(6, semiqs_left)
             _phrase_length = phrase_length
+            # phrase_length -= 2
             
-            probs = [2, 7, 0.2, 3, 5]
-            length_probs = [0, 0, 5, 2, 2]
+            probs = [4, 3, 0.2, 3, 4]
+            length_probs = [0, 0, 0, 2, 5, 2]
+        
+        if (phrase_type == 2):
+            phrase_length = min(8, semiqs_left)
+            _phrase_length = phrase_length
+            
+            probs = [3, 7, 0, 1, 1]
+            length_probs = [2, 3, 1]
+        
+        # elif (phrase_type == 2):
+        #     phrase_length = min(6, semiqs_left)
+        #     _phrase_length = phrase_length
+            
+        #     probs = [5, 2, 0.2, 3, 7]
+        #     length_probs = [3, 2]
 
 
-            current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-            # while (scale[current_step] + tone in [1, 3]) :
-            #     current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+        current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+        # while (scale[current_step] + tone in [1, 3]) :
+        #     current_step = (step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
+
+        length = min(self.get_random_index(length_probs) + 1, phrase_length)
+        phrase.append((scale[current_step] + tone) % 12)
+        phrase.append(length)
+        phrase_length -= length
+
+        while phrase_length > 0:
+            current_step = (current_step + self.get_random_index(probs) - len(probs) // 2) % len(scale)
+
+            while (scale[current_step] + tone in [1, 3]) :
+                current_step = (current_step + self.get_random_index(probs) - len(probs) // 2) % len(scale)
+
+            if semiqs_left % 16 < 3:
+                current_step = 0
 
             length = min(self.get_random_index(length_probs) + 1, phrase_length)
             phrase.append((scale[current_step] + tone) % 12)
             phrase.append(length)
             phrase_length -= length
-
-            while phrase_length > 0:
-                current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-
-                while (scale[current_step] + tone in [1, 3]) :
-                   current_step = (current_step + self.get_random_index(probs) - len(scale) // 2) % len(scale)
-
-                length = min(self.get_random_index(length_probs) + 1, phrase_length)
-                phrase.append((scale[current_step] + tone) % 12)
-                phrase.append(length)
-                phrase_length -= length
-                last_step = current_step
+            last_step = current_step
+            
 
         print(phrase_type)
         return (_phrase_length, last_step, phrase)
             
+    def get_nearest_stable(self, step):
         
+        a = 0
+        m = step
+        if (abs(step - 3) < m):
+            m = abs(step - 3)
+            a = 3      
+    
+        return a    
 
     def get_next(self, current, probs) :  
         return (self.get_random_index(probs) + current - 2)
