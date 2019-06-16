@@ -31,7 +31,7 @@ class MelodyGenerator():
         self.init_chords(self.chords)      
 
     def gen_phrase(self, step, scale, semiqs_left, tone):
-        type_probs = [1, 1, 1]
+        type_probs = [1, 2, 1, 1, 1]
         phrase_type = self.get_random_index(type_probs)
         phrase = []
         _phrase_length = 0
@@ -41,7 +41,7 @@ class MelodyGenerator():
             phrase_length = min(8, semiqs_left)
             _phrase_length = phrase_length
             
-            probs = [1, 3, 0, 7, 3]
+            probs = [1, 1, 0, 7, 3]
             length_probs = [2, 3, 1]
 
         elif (phrase_type == 1):
@@ -57,6 +57,20 @@ class MelodyGenerator():
             _phrase_length = phrase_length
             
             probs = [3, 7, 0, 1, 1]
+            length_probs = [2, 3, 1]
+
+        if (phrase_type == 3):
+            phrase_length = min(8, semiqs_left)
+            _phrase_length = phrase_length
+            
+            probs = [7, 3, 0, 1, 1]
+            length_probs = [2, 3, 1]
+
+        if (phrase_type == 4):
+            phrase_length = min(8, semiqs_left)
+            _phrase_length = phrase_length
+            
+            probs = [7, 3, 0, 1, 1]
             length_probs = [2, 3, 1]
         
         # elif (phrase_type == 2):
@@ -121,9 +135,10 @@ class MelodyGenerator():
 
     def process_chord(self, chord, beats_per_chord=8):
 
+        prev_step = 0
         melody = [chord // 2, 4]
         semiqs_left = (beats_per_chord - 1) * 4
-        prev_step = 0
+        
 
         while semiqs_left > 0:
             
