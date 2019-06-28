@@ -1,16 +1,16 @@
 #include <TimerOne.h>
 
 #include <MsTimer2.h>
-
+// D -- G, B -- C, A -- A, C -- 
 #include <button.h>
 #define eA A0
 #define eB A1
 #define eC A2
 #define eD A3
-#define eE A4
-#define eF A5
-#define eG A6
-#define eH A7
+#define eE A6
+#define eF A7
+#define eG A4
+#define eH A5
 int ms = 10000;
 Button encoderA (eA, 4); // сигнал A
 Button encoderB (eB, 4); //  сигнал B
@@ -27,8 +27,8 @@ long time1 = 0, time2 = 0, time3 = 0, time4 = 0;
 bool wait_for_echo = false;
 long duration, cm;
 
-#define AMotorCW 2
-#define AMotorCCW 3
+#define AMotorCW 3
+#define AMotorCCW 2
 #define AMotorPWM 4
 
 #define BMotorCW 7
@@ -163,6 +163,12 @@ void motorD(int motspeed)
     analogWrite(DMotorCCW, 0); 
   }
 }
+
+void motor_go_mysec(int speedA, int speedB, int speedC, int speedD)
+{
+  motor_go(speedC, speedA, speedD, speedB);
+}
+
 void motor_go(int speed1, int speed2, int speed3, int speed4){
   if(speedich2 < 255 && speedich2 > 0)
     if(speed2 < 0)
@@ -205,18 +211,17 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
       motorD((int)(speedich3));
     else
       motorD(0);
-  if(speedA > 300)
-    speedA = 0;
-      speedich1 -= k*(speedA - speed1);
-  if(speedC > 300)
-    speedC = 0;
-      speedich2 -= k*(speedC - speed2);
-  if(speedE > 300)
-    speedE = 0;
-      speedich3 -= k*(speedE - speed3);
-  if(speedG > 300)
-   speedG = 0;
-      speedich4 -= k*(speedG - speed4);
+  if(speedA > 300) speedA = 0;
+    speedich2 -= k*(speedA - speed2);
+
+  if(speedC > 300) speedC = 0;
+    speedich4 -= k*(speedC - speed4);
+  
+  if(speedE > 300) speedE = 0;
+    speedich1 -= k*(speedE - speed1);
+
+  if(speedG > 300) speedG = 0;
+    speedich3 -= k*(speedG - speed3);
   }
   void motor_stop()
   {
@@ -234,7 +239,7 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
   {
     unsigned long timeich = millis();
     while(millis() < timeich + timer)
-      motor_go(p1,p2,p3,p4);
+      motor_go_mysec(p1,p2,p3,p4);
     motor_stop();
     delay(10);   
     motor_stop();   
@@ -242,10 +247,11 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
   }
   void motor_go_enc(int p1, int p2, int p3, int p4, int timer)
   {
-    posC = 0;
-    while(posC < timer){
-      motor_go(p1,p2,p3,p4);
-      Serial.println(posC);}
+    posA = 0;
+    while(posA < timer){
+      motor_go_mysec(p1,p2,p3,p4);
+      Serial.println(speedA);
+      }
     motor_stop();
     delay(10);   
     motor_stop();
@@ -253,33 +259,45 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
   }
   void backward(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 80;
-    motor_go_time(-s, s, -s, s, timeichkekich);
+    speedich1 = speedich2 = speedich3 = speedich4 = 120;
+    motor_go_time(s, -s, s, -s, timeichkekich);
   }
   void forward(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 100;
-    motor_go_time(s, -s, s, -s, timeichkekich);
+    speedich1 = speedich2 = speedich3 = speedich4 = 120;
+    motor_go_time(-s, s, -s, s, timeichkekich);
   }
   void left(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 80;
-    motor_go_time(s, s, s, s, timeichkekich);
+    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    motor_go_time(-s, -s, -s, -s, timeichkekich);
   }
   void right(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 80;
-    motor_go_time(-s, -s, -s, -s, timeichkekich);
+    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    motor_go_time(s, s, s, s, timeichkekich);
   }
   void rotate_right(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 80;
-    motor_go_enc(-s, -s, s, s, timeichkekich);
+    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    motor_go_enc(s, -s, -s, s, timeichkekich);
   }
   void rotate(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 80;
-    motor_go_enc(s, s, -s,-s, timeichkekich);
+    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    motor_go_enc(-s, s, s, -s, timeichkekich);
+  }
+
+  void tempfunc()
+  {
+    posE = 0;
+    while(posE < 500){
+      motor_go_mysec(30,30,30,30);
+      Serial.println(speedE);
+      }
+    motor_stop();
+    delay(10);   
+    motor_stop();
   }
 
 void loop() {
@@ -366,6 +384,26 @@ void loop() {
       delay(500);
       rotate(30, 90);
       delay(500);
+    } 
+    else if (cmd == 6)
+    {
+      // motor_go_enc(30, 0, 0, 0, 1000);
+      motor_go_enc(0, 30, 0, 0, 100);
+      motor_go_enc(0, 0, 30, 0, 100);
+      motor_go_enc(0, 0, 0, 30, 100);
+    }
+    else if (cmd == 7)
+    {
+      // left(30, 2000);
+      // right(30, 2000);
+      // forward(50, 2000);
+      // backward(50, 2000);
+      rotate(40, 27);
+      rotate_right(40, 27);
+    }
+    else if (cmd == 8)
+    {
+      tempfunc();
     }
   }
 

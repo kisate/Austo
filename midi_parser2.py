@@ -11,10 +11,10 @@ def parse_midi(path_to_midi):
             tempo = mido.tempo2bpm(msg.tempo)
     
     for msg in mid:
-        print(msg)
+        # print(msg)
         if msg.type == 'note_on' or msg.type == 'note_off':
             # print(msg)
-            melody.append([(msg.note - 69) % 12, msg.velocity, int(msg.time*1000)])
+            melody.append([(msg.note - 60) % 12, msg.velocity, int(msg.time*1000)])
 
     prefix = [[0, 0, len(melody)]]
     prefix.extend(melody)
@@ -37,7 +37,9 @@ def parse_midi(path_to_midi):
 
 # print(melody)
 
-melody = parse_midi('midi/pirate2.mid')
+melody = parse_midi('midi/all.mid')
+
+print(melody)
 
 import serial, time
 arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)

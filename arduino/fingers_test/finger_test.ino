@@ -1,11 +1,11 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 #define SERVOMIN 80
 #define SERVOMAX 600
 #define VALVE 13
-#define PUMP 15
+#define PUMP 17
 
 short fingerings[12][8] = {
     {1, 1, 1, 1, 1, 1, 1, 1},  //C
@@ -24,15 +24,15 @@ short fingerings[12][8] = {
 short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
     {0, 0},
-    {30, 0},
+    {40, 15},
     {70, 100}, 
-    {70, 100}, 
-    {70, 100},
-    {70, 100},
-    {30, 0},
-    {30, 0}};
+    {75, 100}, 
+    {45, 90},
+    {50, 100},
+    {95, 60},
+    {75, 35}};
 
-short servos[] = {3, 2, 0, 1, 6, 5, 7, 4, 8};
+short servos[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
 short state = 0;
 short sequence[100];
@@ -52,12 +52,13 @@ void setup()
     pwm.setPWMFreq(60); // Analog servos run at ~60 Hz updates
     
     
-    pinMode(15, OUTPUT); //Pump HIGH -- off, LOW -- on
+    pinMode(17, OUTPUT); //Pump HIGH -- off, LOW -- on
     pinMode(13, OUTPUT);  //Valve HIGH -- off, LOW -- on
     delay(100);
-    digitalWrite(13, LOW);
-    digitalWrite(15, LOW);
-    pwm.setPWM(8, 0, get_pulse(45));
+    digitalWrite(13, HIGH);
+    digitalWrite(17, LOW);
+    pwm.setPWM(8, 0, get_pulse(50));
+    pick_note(0);
 }
 
 void pick_note(uint8_t note)
@@ -65,6 +66,7 @@ void pick_note(uint8_t note)
     for (int i = 0; i < 8; ++i)
     {
         int p = get_pulse(positions[i][fingerings[note][i]]);
+        
         pwm.setPWM(servos[i], 0, p);
     }
 }
@@ -93,97 +95,6 @@ int get_pulse(int angle)
 {
     return map(angle, 0, 100, SERVOMIN, SERVOMAX);
 }
-// void loop()
-// {
-//     // if 
-
-
-//     // Drive each servo one at a time
-
-//     // switch(state)
-//     // {
-//     //     case 0 :
-//     //         if(Serial.available() > 0) {
-//     //             char data = Serial.read();
-//     //             char str[2];
-//     //             str[0] = data;
-//     //             str[1] = '\0';
-//     //             Serial.print(str);
-//     //         }
-//     //         // Serial.print("A");
-//     //         break;
-//     //     default :
-//     //         break;
-//     // }
-
-//     // // Serial.println("B");
-//     // delay(1000);
-
-
-//     // rotate_from_to(int(positions[servonum-4][0]*7/3) + SERVOMIN, int(positions[servonum-4][1]*7/3) + SERVOMIN, servonum);
-//     // rotate_from_to(int(positions[servonum-4][1]*7/3) + SERVOMIN, int(positions[servonum-4][0]*7/3) + SERVOMIN, servonum);
-
-
-    
-
-//     // pwm.setPWM(servos[servonum], 0, p2);
-    
-
-//     // int p1 = get_pulse(positions[4][0]);
-//     // int p2 = get_pulse(positions[4][1]);
-//     // int p3 = get_pulse(positions[5][0]);
-//     // int p4 = get_pulse(positions[5][1]);
-//     // int p5 = get_pulse(positions[6][0]);
-//     // int p6 = get_pulse(positions[7][0]);
-
-//     // digitalWrite(9, HIGH);
-//     // pwm.setPWM(servos[4], 0, p2);
-//     // pwm.setPWM(servos[6], 0, p5);
-//     // pwm.setPWM(servos[7], 0, p6);
-//     // delay(400);
-//     // pwm.setPWM(servos[5], 0, p4);
-//     // delay(400);
-
-//     // digitalWrite(9, LOW);
-//     // pwm.setPWM(servos[5], 0, p3);
-//     // delay(400);
-//     // pwm.setPWM(servos[4], 0, p1);
-//     // delay(400);
-    
-    
-//     // int note = scale[step];
-//     // step++;
-//     // if (step > 6) step = 0;
-
-//     // pick_note(note);
-//     // delay(1000);
-
-//     if(Serial.available() > 0) {
-// 		char data = Serial.read();
-// 		char str[2];
-// 		str[0] = data;
-// 		str[1] = '\0';
-// 		Serial.print(str);
-//         pick_note(int(data));
-//         delay(1000);
-// 	}
-
-
-//     // int p1 = get_pulse(positions[servonum][1]);
-//     // int p2 = get_pulse(positions[servonum][0]);
-
-//     // rotate_from_to(p1, p2, servos[servonum]);
-//     // delay(100);
-//     // rotate_from_to(p2, p1, servos[servonum]);
-//     // delay(100);
-//     // servonum ++;
-//     // if (servonum > 7) servonum = 1;
-
-// }
-
-// void setup() {
-// 	Serial.begin(115200);
-// }
 
 void loop() {
 	if(Serial.available() > 1) {
@@ -193,21 +104,36 @@ void loop() {
         // Serial.write(s);
         // Serial.write(angle);
         // if (angle > 20) 
-        pwm.setPWM(servos[s], 0, get_pulse(angle));
+        
         if (s == 11)
         {
-            digitalWrite(13, HIGH);
-            digitalWrite(15, HIGH);
-        }
-        if (s == 12)
-        {
             digitalWrite(13, LOW);
-            digitalWrite(15, LOW);
+            digitalWrite(17, HIGH);
+        }
+        else if (s == 12)
+        {
+            digitalWrite(13, HIGH);
+            digitalWrite(17, LOW);
             pwm.setPWM(8, 0, get_pulse(45));
         }
-        if (s > 7)
+        else if(s == 10)
+        {
+            for (int i = SERVOMIN; i < SERVOMAX; ++i)
+            {
+                pwm.setPWM(angle, 0, i);
+            }
+            for (int i = SERVOMAX; i > SERVOMIN; --i)
+            {
+                pwm.setPWM(angle, 0, i);
+            }
+        }
+        else if (s > 7)
         {
             pick_note(angle);
+        }
+        else 
+        {
+            pwm.setPWM(servos[s], 0, get_pulse(angle));
         }
         // else 
         // pwm.setPWM(servos[s], 0, SERVOMIN);

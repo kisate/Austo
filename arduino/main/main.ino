@@ -5,7 +5,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN 80
 #define SERVOMAX 600
 #define UPBORDER 9
-#define DOWNBORDER 7 
+#define DOWNBORDER 5 
 #define ARMSMOTORUP 50
 #define ARMSMOTORDOWN 48
 #define HEADSERVO 8
