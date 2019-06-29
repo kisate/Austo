@@ -374,16 +374,9 @@ void loop() {
 
       //delay(30000);
 
-      rotate_right(30, 30);
-      delay(500);
-      forward(40, 5000);
-      delay(500);
-      rotate(30, 60);
-      delay(500);
-      forward(40, 3000);
-      delay(500);
-      rotate(30, 90);
-      delay(500);
+      rotate_right(30, 20);
+      delay(2000);
+      rotate(30, 20);
     } 
     else if (cmd == 6)
     {

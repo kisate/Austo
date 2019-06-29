@@ -36,9 +36,9 @@ short positions[8][2] = {
     {70, 100}, 
     {75, 100}, 
     {45, 90},
-    {50, 100},
+    {40, 100},
     {95, 60},
-    {75, 35}};
+    {85, 25}};
 
 short servos[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
@@ -106,7 +106,7 @@ void loop()
                 read_seq = true;  
                 digitalWrite(VALVE, LOW);    
                 digitalWrite(PUMP, LOW);
-                delay(4000);
+                delay(6000);
             }
         }  
     }

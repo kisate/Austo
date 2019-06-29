@@ -2,6 +2,8 @@ import librosa
 import numpy as np
 import xgboost as xgb
 
+
+
 note_codes = {
     'C' : 0,
     'C#': 1,
@@ -68,11 +70,11 @@ def process_recording(recording, samplerate, booster):
     print(y)
 
     ind = 0
-    while (y[ind] < 0.1):
+    while (y[ind] < 0.001):
         ind += 1
     y = y[ind:]
     ind = len(y)
-    while (y[ind - 1] < 0.1):
+    while (y[ind - 1] < 0.001):
         ind -= 1
     y = y[:ind]
 
@@ -102,7 +104,7 @@ def process_recording(recording, samplerate, booster):
 
     for x in y_pred:
             
-        chord = x.argmax(axis=0)
+        chord = (x.argmax(axis=0) + 18) % len(classes)
             
         if (max(x) > 0.9) : 
             

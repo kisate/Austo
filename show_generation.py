@@ -2,9 +2,10 @@ import numpy as np
 import sounddevice as sd
 from stuff import *
 import json
+from midi_parser2 import parse_midi
 
 waiting = True
-duration = 3
+duration = 10
 print('waiting')
 
 def callback(indata, frames, time, status):
@@ -41,10 +42,6 @@ with open('train/data/config.json') as f:
 
 train_dir = config['train_dir']
 
-import serial, time
-arduino = serial.Serial('/dev/ttyUSB0', 115200)
-time.sleep(1) #give the connection a second to settle
-
 bst = xgb.Booster()
 bst.load_model('0001.model')
 
@@ -63,12 +60,24 @@ from melody_generator import MelodyGenerator
 gen = MelodyGenerator()
 melody = gen.generate(sequence[:4])
 
-melody.extend([20, 0])
+gen.write_midi(melody, 'midi/m.mid')
 
 
+melody = parse_midi('midi/m.mid')
 
-for i in range(len(melody) // 2):
-    
-    arduino.write([melody[i*2], melody[i*2 + 1]])
-    print(arduino.read())
+print(melody)
+
+import serial, time
+arduino = serial.Serial('/dev/ttyUSB0', 115200, timeout=.1)
+time.sleep(1) #give the connection a second to settle
+# arduino.write(b"Hello from Python!")
+
+print(len(melody))
+
+for x in melody:
+    arduino.write([x[0]])
+    arduino.write([x[1]])
+    arduino.write([x[2] >> 8])
+    arduino.write([x[2] & 255])
+    arduino.read()
 

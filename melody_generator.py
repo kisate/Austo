@@ -31,7 +31,7 @@ class MelodyGenerator():
         self.init_chords(self.chords)      
 
     def gen_phrase(self, step, scale, semiqs_left, tone):
-        type_probs = [1, 2, 1, 1, 1]
+        type_probs = [1, 10, 1]
         phrase_type = self.get_random_index(type_probs)
         phrase = []
         _phrase_length = 0
@@ -41,8 +41,8 @@ class MelodyGenerator():
             phrase_length = min(8, semiqs_left)
             _phrase_length = phrase_length
             
-            probs = [1, 1, 0, 7, 3]
-            length_probs = [2, 3, 1]
+            probs = [1, 3, 0, 7, 3]
+            length_probs = [1, 8, 3]
 
         elif (phrase_type == 1):
             phrase_length = min(6, semiqs_left)
@@ -56,23 +56,9 @@ class MelodyGenerator():
             phrase_length = min(8, semiqs_left)
             _phrase_length = phrase_length
             
-            probs = [3, 7, 0, 1, 1]
-            length_probs = [2, 3, 1]
+            probs = [3, 7, 0, 3, 1]
+            length_probs = [1, 8, 3]
 
-        if (phrase_type == 3):
-            phrase_length = min(8, semiqs_left)
-            _phrase_length = phrase_length
-            
-            probs = [7, 3, 0, 1, 1]
-            length_probs = [2, 3, 1]
-
-        if (phrase_type == 4):
-            phrase_length = min(8, semiqs_left)
-            _phrase_length = phrase_length
-            
-            probs = [7, 3, 0, 1, 1]
-            length_probs = [2, 3, 1]
-        
         # elif (phrase_type == 2):
         #     phrase_length = min(6, semiqs_left)
         #     _phrase_length = phrase_length
@@ -136,8 +122,8 @@ class MelodyGenerator():
     def process_chord(self, chord, beats_per_chord=8):
 
         prev_step = 0
-        melody = [chord // 2, 4]
-        semiqs_left = (beats_per_chord - 1) * 4
+        melody = [chord // 2, 8]
+        semiqs_left = (beats_per_chord - 3) * 4
         
 
         while semiqs_left > 0:
@@ -147,7 +133,8 @@ class MelodyGenerator():
             semiqs_left -= phrase_length
             melody.extend(phrase)
             print(phrase)
-
+        
+        melody.extend([12, 4])
         return melody
 
     def generate(self, sequence):
@@ -162,7 +149,7 @@ class MelodyGenerator():
     def write_midi(self, melody, name = 'melody.mid'):
         from mido import Message, MidiFile, MidiTrack, MetaMessage, tempo2bpm, second2tick
 
-        tempo = 120
+        tempo = 200
 
 
         mid = MidiFile(ticks_per_beat=120)

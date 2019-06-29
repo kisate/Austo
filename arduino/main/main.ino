@@ -6,18 +6,15 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX 600
 #define UPBORDER 9
 #define DOWNBORDER 5 
-#define ARMSMOTORUP 50
-#define ARMSMOTORDOWN 48
+#define ARMSMOTORUP 48
+#define ARMSMOTORDOWN 50
 #define HEADSERVO 8
-#define PUMP 15 //HIGH -- off, LOW -- on
+#define PUMP 17 //HIGH -- off, LOW -- on
 #define VALVE 13 //HIGH -- off, LOW -- on
 #define LCD 3
 
 
 short fingerings[12][8] = {
-    {1, 1, 1, 0, 0, 0, 0, 0},  //A
-    {1, 1, 0, 1, 1, 0, 0, 0},  //A#
-    {1, 1, 0, 0, 0, 0, 0, 0},  //B
     {1, 1, 1, 1, 1, 1, 1, 1},  //C
     {1, 1, 1, 1, 1, 1, 1, 0},  //C#
     {1, 1, 1, 1, 1, 1, 1, 0},  //D
@@ -26,20 +23,22 @@ short fingerings[12][8] = {
     {1, 1, 1, 1, 1, 0, 0, 0},  //F
     {1, 1, 1, 1, 0, 1, 1, 1},  //F#
     {1, 1, 1, 1, 0, 0, 0, 0},  //G
-    {1, 1, 1, 0, 1, 1, 0, 0}}; //G#
+    {1, 1, 1, 0, 1, 1, 0, 0}, //G#
+    {1, 1, 1, 0, 0, 0, 0, 0},  //A
+    {1, 1, 0, 1, 1, 0, 0, 0},  //A#
+    {1, 1, 0, 0, 0, 0, 0, 0}};  //B
 short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
     {0, 0},
-    {30, 0},
+    {40, 15},
     {70, 100}, 
-    {70, 100}, 
-    {70, 100},
-    {70, 100},
-    {30, 0},
-    {30, 0}};
+    {75, 100}, 
+    {45, 90},
+    {40, 100},
+    {95, 60},
+    {85, 25}};
 
-
-short servos[] = {3, 2, 0, 1, 6, 5, 7, 4};
+short servos[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 
 short state = 0;
 
@@ -83,8 +82,9 @@ void setup()
 
     delay(100);
     pwm.setPWM(8, 0, get_pulse(45));
-    pick_note(3);
+    pick_note(0);
     delay(100);
+    lower_arms();
 }
 
 void pick_note(uint8_t note)
@@ -166,13 +166,13 @@ void loop() {
             pwm.setPWM(8, 0, get_pulse(i));
             delay(50);
         }
+        
+        digitalWrite(VALVE, LOW);
+        digitalWrite(PUMP, LOW);    
 
         raise_arms();
         
-        digitalWrite(VALVE, HIGH);
-        digitalWrite(PUMP, LOW);    
-
-        delay(1000);
+        delay(4000);
 
         state = 1;
 
@@ -185,20 +185,20 @@ void loop() {
 
         delay(500);
 
-        pick_note(3);
-        digitalWrite(VALVE, LOW);
+        pick_note(0);
+        digitalWrite(VALVE, HIGH);
         delay(1000);
         
+        pick_note(4);
+        delay(1000);
+
         pick_note(7);
         delay(1000);
 
-        pick_note(10);
-        delay(1000);
-
-        digitalWrite(VALVE, HIGH);
+        digitalWrite(VALVE, LOW);
         digitalWrite(PUMP, HIGH);
 
-        state = 2;
+        state = 3;
         Serial.write(1);
 
     }
@@ -210,7 +210,7 @@ void loop() {
         delay(500);
 
         pick_note(10);
-        digitalWrite(VALVE, LOW);
+        digitalWrite(VALVE, HIGH);
         digitalWrite(PUMP, LOW);
         delay(1000);
         
@@ -220,7 +220,7 @@ void loop() {
         pick_note(5);
         delay(1000);
 
-        digitalWrite(VALVE, HIGH);
+        digitalWrite(VALVE, LOW);
         digitalWrite(PUMP, HIGH);
         pick_note(3);
 
@@ -238,7 +238,7 @@ void loop() {
             delay(50);
         }
         digitalWrite(LCD, HIGH);
-        digitalWrite(VALVE, HIGH);
+        digitalWrite(VALVE, LOW);
         digitalWrite(PUMP, HIGH);
         state = 4;
         Serial.write(1);
@@ -259,7 +259,7 @@ void loop() {
                 delay(50);
             }
 
-            digitalWrite(VALVE, HIGH);
+            digitalWrite(VALVE, LOW);
             digitalWrite(PUMP, LOW);
             
             delay(1000);
@@ -284,7 +284,7 @@ void loop() {
         {
             if (sequence[i][0] == 12)
             {
-                digitalWrite(VALVE, HIGH);
+                digitalWrite(VALVE, LOW);
                 digitalWrite(PUMP, HIGH);
                 
                 delay(uint16_t(sequence[i][1]*semiq2*1));
@@ -294,14 +294,14 @@ void loop() {
             {
                 pick_note(sequence[i][0]);
                 digitalWrite(PUMP, LOW);
-                digitalWrite(VALVE, LOW);
-                delay(uint16_t(sequence[i][1]*semiq2*0.95));
                 digitalWrite(VALVE, HIGH);
+                delay(uint16_t(sequence[i][1]*semiq2*0.95));
+                digitalWrite(VALVE, LOW);
                 delay(uint16_t(sequence[i][1]*semiq2*0.05));
             }
         }
 
-        digitalWrite(VALVE, HIGH);
+        digitalWrite(VALVE, LOW);
         digitalWrite(PUMP, HIGH);
         seq_length = 0;
         state = 6;
@@ -332,7 +332,7 @@ void loop() {
             if (seq_length == total_seq_length) 
             {
                 digitalWrite(PUMP, LOW);
-                digitalWrite(VALVE, HIGH);
+                digitalWrite(VALVE, LOW);
                 delay(1000);
                 
                 state = 7;
@@ -353,19 +353,20 @@ void loop() {
             
             if (sequence[i][1] > 0)
             {
-                digitalWrite(VALVE, LOW);    
+                digitalWrite(VALVE, HIGH);    
                 digitalWrite(PUMP, LOW);
             }
             else 
             {
-                digitalWrite(VALVE, HIGH);
+                digitalWrite(VALVE, LOW);
             } 
 
         }
 
-        digitalWrite(VALVE, HIGH);
+        digitalWrite(VALVE, LOW);
         digitalWrite(PUMP, HIGH);
         state = 8;
+        lower_arms();
         Serial.write(1);
     }   
 }

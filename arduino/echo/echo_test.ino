@@ -1,5 +1,5 @@
-int trigPin = A9; 
-int echoPin = A8; 
+int trigPin = A14; 
+int echoPin = A15; 
 
 void setup() { 
 Serial.begin (115200); 
