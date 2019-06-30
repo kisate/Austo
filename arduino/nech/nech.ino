@@ -12,6 +12,7 @@
 #define eG A4
 #define eH A5
 int ms = 10000;
+int cmd = 0;
 Button encoderA (eA, 4); // сигнал A
 Button encoderB (eB, 4); //  сигнал B
 Button encoderC (eC, 4); // сигнал A
@@ -43,8 +44,8 @@ long duration, cm;
 #define DMotorCCW 11
 #define DMotorPWM 13
 
-int trigPin = A9; 
-int echoPin = A8; 
+int trigPin = A14; 
+int echoPin = A15; 
 
 
 int Speed = 200;
@@ -250,12 +251,11 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
     posA = 0;
     while(posA < timer){
       motor_go_mysec(p1,p2,p3,p4);
-      Serial.println(speedA);
+      Serial.println("\n");
       }
     motor_stop();
     delay(10);   
     motor_stop();
-    Serial.println("DONE");
   }
   void backward(int s, int timeichkekich)
   {
@@ -304,29 +304,44 @@ void loop() {
 
   if (wait_for_echo)
     {
-      digitalWrite(trigPin, LOW);
-      delayMicroseconds(5);
-      digitalWrite(trigPin, HIGH);
-      delayMicroseconds(10);
-      digitalWrite(trigPin, LOW);
-    
-      // Read the signal from the sensor: a HIGH pulse whose
-      // duration is the time (in microseconds) from the sending
-      // of the ping to the reception of its echo off of an object.
-      
-      duration = pulseIn(echoPin, HIGH);
-    
-      // Convert the time into a distance
-      cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+      int duration, distance; 
+      // для большей точности установим значение LOW на пине Trig
+      digitalWrite(trigPin, LOW); 
+      delayMicroseconds(2); 
+      // Теперь установим высокий уровень на пине Trig 
+      digitalWrite(trigPin, HIGH); 
+      // Подождем 10 μs 
+      delayMicroseconds(10); 
+      digitalWrite(trigPin, LOW); 
+      // Узнаем длительность высокого сигнала на пине Echo 
+      duration = pulseIn(echoPin, HIGH); 
+      // Рассчитаем расстояние 
+      distance = duration / 58;   // Divide by 29.1 or multiply by 0.0343
 
-      if (duration > 0 && cm < 25) 
+      if (duration > 0 && distance < 25) 
       {
         wait_for_echo = false;
-        rotate_right(30,30);
-        delay(1000);
-        forward(45, 3000);
-        delay(1000);
-        Serial.write(1);
+        if (cmd == 3)
+        {
+          rotate_right(30,30);
+          delay(1000);
+          forward(45, 3000);
+          delay(1000);
+          Serial.write(1);
+        }
+        else if (cmd == 31)
+        {
+          Serial.write(1);
+          forward(30, 3000);
+          delay(3000);
+          right(20, 3000);
+          delay(3000);
+          Serial.write(1);
+        }
+        else if (cmd == 32)
+        {
+          Serial.write(1);
+        }
       }
       delay(250);
     }
@@ -334,10 +349,7 @@ void loop() {
 
   else if (Serial.available() > 0)
   {
-    unsigned cmd = Serial.read();
-    
-    
-
+    cmd = Serial.read();
     if (cmd == 1)
     {
       delay(2000);
@@ -397,6 +409,24 @@ void loop() {
     else if (cmd == 8)
     {
       tempfunc();
+    }
+    else if (cmd == 31)
+    {
+      wait_for_echo = true;
+    }
+    else if (cmd == 32)
+    {
+      wait_for_echo = true;
+    }
+    else if (cmd == 33)
+    {
+      rotate_right(30, 30);
+      Serial.write(1);
+    }
+    else if (cmd == 34)
+    {
+      rotate(30, 30);
+      Serial.write(1);
     }
   }
 

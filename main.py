@@ -154,12 +154,6 @@ time.sleep(1) #give the connection a second to settle
 nechduino.write([1])
 
 
-def wait_a(a):
-    global waiting
-    waiting = True
-    a.read()
-    waiting = False
-    print('!!!!')
 
 waiting = True
 t = threading.Thread(target=wait_a, args=(nechduino,))

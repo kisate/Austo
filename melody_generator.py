@@ -119,7 +119,7 @@ class MelodyGenerator():
                 return i
 
 
-    def process_chord(self, chord, beats_per_chord=8):
+    def process_chord(self, chord, beats_per_chord=16):
 
         prev_step = 0
         melody = [chord // 2, 8]
