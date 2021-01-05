@@ -33,14 +33,14 @@ short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
     {0, 0},
     {40, 15},
-    {70, 100}, 
-    {75, 100}, 
+    {60, 100}, 
+    {20, 80}, 
     {45, 90},
-    {40, 100},
-    {95, 60},
-    {85, 25}};
+    {25, 90},
+    {100, 40},
+    {70, 30}};
 
-short servos[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+short servos[] = {0, 1, 2, 3, 4, 5, 6, 10, 8};
 
 
 void setup()
@@ -62,7 +62,7 @@ void setup()
     pick_note(0);
     delay(100);
 
-    pwm.setPWM(8, 0, get_pulse(45));
+    pwm.setPWM(8, 0, get_pulse(47));
 }
 
 void pick_note(uint8_t note)
@@ -70,7 +70,7 @@ void pick_note(uint8_t note)
     for (int i = 0; i < 8; ++i)
     {
         int p = get_pulse(positions[i][fingerings[note][i]]);
-        pwm.setPWM(i, 0, p);
+        pwm.setPWM(servos[i], 0, p);
     }
 }
 

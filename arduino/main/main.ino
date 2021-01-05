@@ -6,8 +6,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX 600
 #define UPBORDER 9
 #define DOWNBORDER 5 
-#define ARMSMOTORUP 48
-#define ARMSMOTORDOWN 50
+#define ARMSMOTORUP 50
+#define ARMSMOTORDOWN 48
 #define HEADSERVO 8
 #define PUMP 17 //HIGH -- off, LOW -- on
 #define VALVE 13 //HIGH -- off, LOW -- on
@@ -29,16 +29,16 @@ short fingerings[12][8] = {
     {1, 1, 0, 0, 0, 0, 0, 0}};  //B
 short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
-    {0, 0},
+ {0, 0},
     {40, 15},
-    {70, 100}, 
-    {75, 100}, 
+    {60, 100}, 
+    {20, 80}, 
     {45, 90},
-    {40, 100},
-    {95, 60},
-    {85, 25}};
+    {25, 90},
+    {100, 40},
+    {70, 30}};
 
-short servos[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+short servos[] = {0, 1, 2, 3, 4, 5, 6, 10, 8};
 
 short state = 0;
 
@@ -81,10 +81,10 @@ void setup()
     digitalWrite(ARMSMOTORDOWN, LOW);
 
     delay(100);
-    pwm.setPWM(8, 0, get_pulse(45));
+    pwm.setPWM(8, 0, get_pulse(46));
     pick_note(0);
     delay(100);
-    lower_arms();
+    raise_arms();
 }
 
 void pick_note(uint8_t note)
@@ -153,7 +153,7 @@ void loop() {
         
         //lower_arms();
 
-        for (int i = 45; i > 22; --i)
+        for (int i = 46; i > 22; --i)
         {
             pwm.setPWM(8, 0, get_pulse(i));
             delay(50);
@@ -161,7 +161,7 @@ void loop() {
         
         delay(1500);
 
-        for (int i = 22; i <= 45; ++i)
+        for (int i = 22; i <= 46; ++i)
         {
             pwm.setPWM(8, 0, get_pulse(i));
             delay(50);
@@ -170,10 +170,8 @@ void loop() {
         digitalWrite(VALVE, LOW);
         digitalWrite(PUMP, LOW);    
 
-        raise_arms();
-        
-        delay(4000);
-
+        // raise_arms();
+    
         state = 1;
 
         Serial.write(1);
@@ -232,7 +230,7 @@ void loop() {
     else if(state == 3 && Serial.available() > 0)
     {
         Serial.read();
-        for (int i = 45; i > 22; --i)
+        for (int i = 44; i > 22; --i)
         {
             pwm.setPWM(8, 0, get_pulse(i));
             delay(50);
@@ -253,7 +251,7 @@ void loop() {
         if (dur == 0) 
         {
             
-            for (int i = 22; i <= 45; ++i)
+            for (int i = 22; i <= 44; ++i)
             {
                 pwm.setPWM(8, 0, get_pulse(i));
                 delay(50);

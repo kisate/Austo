@@ -24,5 +24,5 @@ distance = duration / 58;
 // Выведем значение в Serial Monitor 
 Serial.print(distance); 
 Serial.println(" cm"); 
-delay(100); 
+delay(250); 
 }

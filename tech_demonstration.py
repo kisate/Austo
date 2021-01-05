@@ -55,7 +55,7 @@ arduino = serial.Serial('/dev/ttyUSB0', 115200)
 time.sleep(1) #give the connection a second to settle
 
 model = classifier.Classifier(r'/home/tlab/Documents/models/frozen_inference_graph.pb')
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(2)
 _, frame = cap.read()
 boxes, scores, classes, num = model.get_classification(frame)
 
@@ -164,10 +164,12 @@ sequence = process_recording(myrecording, samplerate, bst)
 arduino.write([1])
 arduino.read()
 
+arduino.write([1])
+
 nechduino.write([33])
 nechduino.read()
 
-time.sleep(10)
+time.sleep(3)
 
 output = [names[x] for x in sequence[:4]]
 
@@ -185,6 +187,9 @@ cv2.waitKey(2000)
 nechduino.write([34])
 nechduino.read()
 
+nechduino.write([32])
+nechduino.read()
+
 gen = MelodyGenerator()
 melody = gen.generate(sequence[:4])
 print(len(melody))
@@ -192,6 +197,8 @@ print(len(melody))
 gen.write_midi(melody, 'midi/m.mid')
 
 melody = parse_midi('midi/m.mid')
+
+wait_sound()
 
 for x in melody:
     arduino.write([x[0]])
@@ -205,9 +212,13 @@ arduino.read()
 nechduino.write([32])
 nechduino.read()
 
-wait_sound()
+arduino.write([1])
 
-melody = parse_midi('midi/pirate3.mid')
+nechduino.write([34])
+nechduino.read()
+
+melody = parse_midi('midi/ode2.mid')
+wait_sound()
 
 for x in melody:
     arduino.write([x[0]])

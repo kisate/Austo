@@ -1,20 +1,20 @@
-#define AMotorCW 1
-#define AMotorCCW 2
-#define AMotorPWM 3
+#define AMotorCW 3
+#define AMotorCCW 4
+#define AMotorPWM 10
 
-#define BMotorCW 6
-#define BMotorCCW 7
-#define BMotorPWM 5
+#define BMotorCW 7
+#define BMotorCCW 8
+#define BMotorPWM 9
 
-#define CMotorCW 8
-#define CMotorCCW 9
+#define CMotorCW 4
+#define CMotorCCW 5
 #define CMotorPWM 10
 
 #define DMotorCW 12
 #define DMotorCCW 13
 #define DMotorPWM 11
 
-#define Speed 150
+#define Speed 255
 
 void setup() {
   
@@ -102,26 +102,11 @@ void motorD(int motspeed)
 void loop() {
 
 
-  motorA(Speed);
-  motorB(Speed);
-  motorC(Speed);
-  motorD(Speed);
-  delay(4000);
-  motorA(0);
-  motorB(0);
-  motorC(0);
-  motorD(0);
-  delay(1000);
-  motorA(-Speed);
-  motorB(-Speed);
-  motorC(-Speed);
-  motorD(-Speed);
-  delay(4000);
-  motorA(0);
-  motorB(0);
-  motorC(0);
-  motorD(0);
-  delay(1000);
+  for (int i = 40; i < Speed; ++i)
+  {
+    motorA(i);
+    delay(50);
+  }
 
 
   /*

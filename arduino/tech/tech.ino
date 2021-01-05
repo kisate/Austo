@@ -5,8 +5,8 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX 600
 #define UPBORDER 9
 #define DOWNBORDER 5 
-#define ARMSMOTORUP 48
-#define ARMSMOTORDOWN 50
+#define ARMSMOTORUP 50
+#define ARMSMOTORDOWN 48
 #define PUMP 17 //HIGH -- off, LOW -- on
 #define VALVE 13 //HIGH -- off, LOW -- on
 
@@ -71,7 +71,7 @@ void setup()
     delay(100);
     pick_note(0);
     delay(100);
-    raise_arms();
+    lower_arms();
 
     pwm.setPWM(8, 0, get_pulse(45));
 }
@@ -121,7 +121,7 @@ void loop()
         if (Serial.available() > 0)
         {
             Serial.read();
-            lower_arms();
+            
             raise_arms();
             Serial.write(1);
             state = 1;
@@ -155,8 +155,23 @@ void loop()
             state = 3;
         }
     }
-    
+
     else if (state == 3)
+    {
+        if (Serial.available() > 0)
+        {
+            Serial.read();
+            digitalWrite(VALVE, LOW);    
+            digitalWrite(PUMP, LOW);
+
+            read_seq = false;
+            read_meta = false;
+
+            state = 4;
+        }
+    }
+    
+    else if (state == 4)
     {
 
         if (not read_seq && Serial.available() > 3)
@@ -183,9 +198,6 @@ void loop()
                 if (seq_length == total_seq_length) 
                 {
                     read_seq = true;  
-                    digitalWrite(VALVE, LOW);    
-                    digitalWrite(PUMP, LOW);
-                    delay(6000);
                 }
             }  
         }
@@ -208,8 +220,10 @@ void loop()
                     digitalWrite(VALVE, LOW);
                 } 
             }
-            read_seq = false;
-            read_meta = false;
+            
+            digitalWrite(VALVE, LOW);
+            digitalWrite(PUMP, HIGH);
+            state = 3;
             Serial.write(1);
         }
     }

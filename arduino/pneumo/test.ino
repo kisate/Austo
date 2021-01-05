@@ -1,7 +1,7 @@
 #define UPBORDER 9
 #define DOWNBORDER 5
-#define ARMSMOTORUP 48
-#define ARMSMOTORDOWN 50
+#define ARMSMOTORUP 50
+#define ARMSMOTORDOWN 48
 #define LCD 3
 void setup()
 {
@@ -14,8 +14,7 @@ void setup()
 }
 
 void loop()
-{
-    
+{    
     raise_arms();
 }
 

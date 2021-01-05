@@ -9,6 +9,8 @@ while True:
 	a = input()
 	seq = [int(x) for x in a.split()]
 	arduino.write(seq)
+	# while True:
+	# 	print(arduino.read())
 
 
 # while True:

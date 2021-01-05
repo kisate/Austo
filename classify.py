@@ -10,7 +10,7 @@ from random import randint
 
 import serial
 
-MINDIST = 50 # minimal deviation in pix for NXT to move
+MINDIST = 20 # minimal deviation in pix for NXT to move
 COMMAND_FREQ = 0.2 # 1 sec between commands to NXTs
 SPEED_COEF = 0.4 # speed per pixel of dist
 

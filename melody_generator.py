@@ -137,10 +137,10 @@ class MelodyGenerator():
         melody.extend([12, 4])
         return melody
 
-    def generate(self, sequence):
+    def generate(self, sequence, beats_per_chord=16):
         melody = []
         for chord in sequence:
-            part = self.process_chord(chord)
+            part = self.process_chord(chord, beats_per_chord)
             melody.extend(part)
             # part = self.process_chord(chord)
             # melody.extend(part)

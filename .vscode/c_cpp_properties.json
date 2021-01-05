@@ -3,6 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
+                "/home/tlab/Downloads/arduino-1.8.8/hardware/arduino/avr/libraries/SoftwareSerial/src",
                 "/home/tlab/Arduino/libraries/TimerOne",
                 "/home/tlab/Arduino/libraries/button",
                 "/home/tlab/Arduino/libraries/arduino_503710",

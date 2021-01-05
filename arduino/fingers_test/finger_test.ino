@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 
-Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN 80
 #define SERVOMAX 600
 #define VALVE 13
@@ -25,14 +25,14 @@ short scale[] = {3, 5, 7, 8, 10, 0, 2};
 short positions[8][2] = {
     {0, 0},
     {40, 15},
-    {70, 100}, 
-    {75, 100}, 
+    {60, 100}, 
+    {20, 80}, 
     {45, 90},
-    {50, 100},
-    {95, 60},
-    {75, 35}};
+    {25, 90},
+    {100, 40},
+    {70, 30}};
 
-short servos[] = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+short servos[] = {0, 1, 2, 3, 4, 5, 6, 10, 8};
 
 short state = 0;
 short sequence[100];

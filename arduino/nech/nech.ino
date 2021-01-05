@@ -1,3 +1,5 @@
+#include <SoftwareSerial.h>
+
 #include <TimerOne.h>
 
 #include <MsTimer2.h>
@@ -26,7 +28,11 @@ long posA = 0, posC = 0, posE = 0, posG = 0; // пооложение энкод�
 float speedA = 50000, speedC = 50000, speedE = 50000, speedG = 50000;
 long time1 = 0, time2 = 0, time3 = 0, time4 = 0;
 bool wait_for_echo = false;
+bool dancing = false;
 long duration, cm;
+int echo_counter = 0;
+short dancing_state = 0;
+SoftwareSerial mySerial(34, 35); // ebuchie interupty
 
 #define AMotorCW 3
 #define AMotorCCW 2
@@ -251,7 +257,9 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
     posA = 0;
     while(posA < timer){
       motor_go_mysec(p1,p2,p3,p4);
-      Serial.println("\n");
+      mySerial.println("1");
+      
+      delay(10);
       }
     motor_stop();
     delay(10);   
@@ -259,32 +267,32 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
   }
   void backward(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 120;
+    speedich1 = speedich2 = speedich3 = speedich4 = 200;
     motor_go_time(s, -s, s, -s, timeichkekich);
   }
   void forward(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 120;
+    speedich1 = speedich2 = speedich3 = speedich4 = 200;
     motor_go_time(-s, s, -s, s, timeichkekich);
   }
   void left(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    speedich1 = speedich2 = speedich3 = speedich4 = 200;
     motor_go_time(-s, -s, -s, -s, timeichkekich);
   }
   void right(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    speedich1 = speedich2 = speedich3 = speedich4 = 200;
     motor_go_time(s, s, s, s, timeichkekich);
   }
   void rotate_right(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    speedich1 = speedich2 = speedich3 = speedich4 = 200;
     motor_go_enc(s, -s, -s, s, timeichkekich);
   }
   void rotate(int s, int timeichkekich)
   {
-    speedich1 = speedich2 = speedich3 = speedich4 = 100;
+    speedich1 = speedich2 = speedich3 = speedich4 = 200;
     motor_go_enc(-s, s, s, -s, timeichkekich);
   }
 
@@ -293,7 +301,7 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
     posE = 0;
     while(posE < 500){
       motor_go_mysec(30,30,30,30);
-      Serial.println(speedE);
+      mySerial.println(speedE);
       }
     motor_stop();
     delay(10);   
@@ -302,6 +310,30 @@ void motor_go(int speed1, int speed2, int speed3, int speed4){
 
 void loop() {
 
+  if (dancing)
+    {
+      if (dancing_state == 0)
+      {
+        motor_stop();
+        mySerial.println();
+        
+      }
+      else if (dancing_state == 1)
+      {
+        motor_go_mysec(-150, 150, 150, -150);
+        mySerial.println();
+      }
+      else if (dancing_state == 2)
+      {
+        motor_stop();
+        mySerial.println();
+      }
+      else if (dancing_state == 3)
+      {
+        motor_go_mysec(-200, 200, -200, 200);
+        mySerial.println();
+      }
+    }
   if (wait_for_echo)
     {
       int duration, distance; 
@@ -318,32 +350,73 @@ void loop() {
       // Рассчитаем расстояние 
       distance = duration / 58;   // Divide by 29.1 or multiply by 0.0343
 
-      if (duration > 0 && distance < 25) 
+      if (distance > 0 && distance < 15) 
       {
-        wait_for_echo = false;
-        if (cmd == 3)
-        {
-          rotate_right(30,30);
-          delay(1000);
-          forward(45, 3000);
-          delay(1000);
-          Serial.write(1);
-        }
-        else if (cmd == 31)
-        {
-          Serial.write(1);
-          forward(30, 3000);
-          delay(3000);
-          right(20, 3000);
-          delay(3000);
-          Serial.write(1);
-        }
-        else if (cmd == 32)
-        {
-          Serial.write(1);
+        echo_counter++;
+
+        if (echo_counter >= 5)
+        {   
+          wait_for_echo = false;
+          echo_counter = 0;
+
+          if (dancing)
+          {
+            if (dancing_state == 0)
+            {
+              wait_for_echo = true;
+              dancing_state = 1;
+              speedich1 = speedich2 = speedich3 = speedich4 = 100;
+              motor_go_mysec(-100, 100, 100, -100);
+              delay(500);
+            }
+            else if (dancing_state == 1)
+            {
+              wait_for_echo = true;
+              dancing_state = 2;
+              motor_stop();
+              delay(500);
+            }
+            else if (dancing_state == 2)
+            {
+              wait_for_echo = true;
+              dancing_state = 3;
+              speedich1 = speedich2 = speedich3 = speedich4 = 200;
+              motor_go_mysec(-200, 200, -200, 200);
+              delay(500);
+            }
+            else if (dancing_state == 3)
+            {
+              wait_for_echo = true;
+              dancing_state = 0;
+              motor_stop();
+              delay(500);
+            }
+          }
+          else if (cmd == 3)
+          {
+            rotate_right(30, 25);
+            delay(1000);
+            forward(45, 3000);
+            delay(1000);
+            Serial.write(1);
+          }
+          else if (cmd == 31)
+          {
+            Serial.write(1);
+            forward(30, 3000);
+            delay(3000);
+            right(20, 3000);
+            delay(3000);
+            Serial.write(1);
+          }
+          else if (cmd == 32)
+          {
+            Serial.write(1);
+          }
         }
       }
-      delay(250);
+      else echo_counter = 0;
+      delay(50);
     }
 
 
@@ -354,9 +427,9 @@ void loop() {
     {
       delay(2000);
 
-      forward(30, 2000);
+      forward(50, 2000);
       delay(2000);
-      right(20, 2000);
+      right(50, 2000);
       delay(2000);
       Serial.write(1);
     }
@@ -386,8 +459,18 @@ void loop() {
 
       //delay(30000);
 
-      rotate_right(30, 20);
+      rotate_right(30, 10);
       delay(2000);
+      forward(40, 1500);
+      delay(2000);
+      rotate(30, 27);
+      delay(1000);
+      forward(40, 7000);
+      delay(1000);
+      rotate(30, 43);
+      delay(1000);
+      forward(40, 5000);
+      delay(1000);
       rotate(30, 20);
     } 
     else if (cmd == 6)
@@ -403,8 +486,9 @@ void loop() {
       // right(30, 2000);
       // forward(50, 2000);
       // backward(50, 2000);
-      rotate(40, 27);
-      rotate_right(40, 27);
+      rotate_right(30, 10);
+      Serial.write(1);
+      // rotate_right(40, 27);
     }
     else if (cmd == 8)
     {
@@ -420,13 +504,18 @@ void loop() {
     }
     else if (cmd == 33)
     {
-      rotate_right(30, 30);
+      rotate_right(30, 25);
       Serial.write(1);
     }
     else if (cmd == 34)
     {
-      rotate(30, 30);
+      rotate(30, 25);
       Serial.write(1);
+    }
+    else if (cmd = 70)
+    {
+      dancing = true;
+      wait_for_echo = true;
     }
   }
 
@@ -477,7 +566,9 @@ void timerInterrupt() {
         posE++;
       }
       speedE = ms / time3;
+      // Serial.println(time3);
       time3 = 0;
+      // Serial.println(speedE);
   } 
   if( encoderG.flagClick == true ) {
     encoderG.flagClick = false;
@@ -488,6 +579,7 @@ void timerInterrupt() {
         posG++;
       }
       speedG = ms / time4;
+      // Serial.println(time4);
       time4 = 0;
   } 
 }
